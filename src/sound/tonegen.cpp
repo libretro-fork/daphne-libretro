@@ -31,7 +31,7 @@
 tonegen g_tonegen;
 bool g_tonegen_init = false;
 
-int tonegen_initialize(Uint32 unused)
+int tonegen_initialize(uint32_t unused)
 {
 	int result = -1;
 	if (!g_tonegen_init)
@@ -54,12 +54,12 @@ int tonegen_initialize(Uint32 unused)
 	return result;
 }
 
-void tonegen_writedata(Uint32 channel, Uint32 frequency, int index)
+void tonegen_writedata(uint32_t channel, uint32_t frequency, int index)
 {
 	g_tonegen.bytes_per_switch[channel] = frequency?(int) ((AUDIO_FREQ / frequency * 4 / 2) + .5):0;
 }
 
-void tonegen_stream(Uint8* stream, int length, int index)
+void tonegen_stream(uint8_t* stream, int length, int index)
 {
 	for (int pos = 0; pos < length; pos += 4)
 	{
@@ -72,8 +72,8 @@ void tonegen_stream(Uint8* stream, int length, int index)
 			sample += g_tonegen.amplitude[channel] * g_tonegen.flip[channel] / VOICES;
 		}
 
-		stream[pos] = stream[pos+2] = (Uint16) (sample) & 0xff; 
-		stream[pos+1] = stream[pos+3] = ((Uint16) (sample) >> 8) & 0xff; 
+		stream[pos] = stream[pos+2] = (uint16_t) (sample) & 0xff; 
+		stream[pos+1] = stream[pos+3] = ((uint16_t) (sample) >> 8) & 0xff; 
 
 		for (channel = 0; channel < VOICES; channel++)
 		{

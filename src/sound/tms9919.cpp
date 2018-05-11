@@ -26,6 +26,7 @@
 //
 //----------------------------------------------------------------------------
 
+#include <stdint.h>
 //#include <stdlib.h>
 #include "SDL.h"
 //#include "common.hpp"
@@ -62,7 +63,7 @@ cTMS9919::~cTMS9919 ()
 //    FUNCTION_ENTRY ( this, "cTMS9919 dtor", true );
 }
 
-void cTMS9919::set_core_frequency(Uint32 core_frequency)
+void cTMS9919::set_core_frequency(uint32_t core_frequency)
 {
    m_clock_frequency = core_frequency;
 }
@@ -105,7 +106,7 @@ int cTMS9919::SetSpeechSynthesizer ( cTMS5220 *speech )
     return -1;
 }
 
-void cTMS9919::WriteData ( Uint8 data )
+void cTMS9919::WriteData ( uint8_t data )
 {
 //    FUNCTION_ENTRY ( this, "cTMS9919::WriteData", true );
 
@@ -127,7 +128,7 @@ void cTMS9919::WriteData ( Uint8 data )
                 // Handle Noise control
                 SetNoise (( data & 0x04 ) ? NOISE_WHITE : NOISE_PERIODIC, ( data & 0x03 ));
             } else {
-                m_LastData = 0xFF00 | ( Uint8 ) data;
+                m_LastData = 0xFF00 | ( uint8_t ) data;
             }
         }
     }

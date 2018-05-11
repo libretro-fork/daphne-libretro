@@ -23,18 +23,20 @@
 #ifndef TONEGEN_H
 #define TONEGEN_H
 
+#include <stdint.h>
+
 #define VOICES 4
 
-int tonegen_initialize(Uint32);
-void tonegen_writedata(Uint32, Uint32, int index);
-void tonegen_stream(Uint8* stream, int length, int index);
+int tonegen_initialize(uint32_t);
+void tonegen_writedata(uint32_t, uint32_t, int index);
+void tonegen_stream(uint8_t* stream, int length, int index);
 
 struct tonegen
 {
 	int bytes_per_switch[VOICES];
 	int flip[VOICES];
 	int bytes_to_go[VOICES];
-	Sint16 amplitude[VOICES];
+	int16_t amplitude[VOICES];
 };
 
 #endif
