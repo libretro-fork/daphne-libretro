@@ -28,7 +28,7 @@
 #include <windows.h>
 #endif
 
-#include <SDL.h>
+#include <stdint.h>
 #include <string.h>
 #include "../daphne.h"
 #include "conout.h"
@@ -40,7 +40,6 @@
 #include "../video/SDL_DrawText.h"
 
 // RJS ADD
-extern SDL_Renderer *g_renderer;
 
 const char *instr = "Read daphne_log.txt for help";
 

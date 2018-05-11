@@ -32,11 +32,31 @@ SOURCES_C   := $(DEPS_DIR)/libogg/src/bitwise.c \
 
 SOURCES_CXX := 
 
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/6809infc.cpp
+SOURCES_CXX += $(CORE_DIR)/src/cpu/6809infc_ORIG.cpp
+SOURCES_CXX += $(CORE_DIR)/src/cpu/6809infc_v1.cpp
 SOURCES_CXX += $(CORE_DIR)/src/cpu/cop.cpp
 #SOURCES_CXX += $(CORE_DIR)/src/cpu/copintf.cpp
 #SOURCES_CXX += $(CORE_DIR)/src/cpu/cpu.cpp
-#SOURCES_CXX += $(CORE_DIR)/src/cpu/6809infc.cpp
+SOURCES_CXX += $(CORE_DIR)/src/cpu/cpu-debug.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/m80.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/mamewrap.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/mc6809.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/mc6809_ORIG.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/mc6809_v1.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/nes_6502.cpp
+SOURCES_CXX += $(CORE_DIR)/src/cpu/nes6502.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/z80.cpp
+
 #SOURCES_CXX += $(CORE_DIR)/src/io/cmdline.cpp
+#SOURCES_CXX  += $(CORE_DIR)/src/io/conin.cpp
+#SOURCES_CXX  += $(CORE_DIR)/src/io/conout.cpp
+#SOURCES_CXX  += $(CORE_DIR)/src/io/error.cpp
+SOURCES_CXX  += $(CORE_DIR)/src/io/numstr.cpp
+SOURCES_CXX  += $(CORE_DIR)/src/io/parallel.cpp
+#SOURCES_CXX  += $(CORE_DIR)/src/io/serial.cpp
+SOURCES_CXX  += $(CORE_DIR)/src/io/sram.cpp
+SOURCES_CXX  += $(CORE_DIR)/src/io/unzip.cpp
 
 SOURCES_CXX += $(CORE_DIR)/src/sound/dac.cpp
 SOURCES_CXX += $(CORE_DIR)/src/sound/gisound.cpp

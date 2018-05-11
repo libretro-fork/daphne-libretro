@@ -64,14 +64,14 @@ int generic_m80_nmi_callback()
 
 #ifndef USE_M80
 // generic function to set the memory location for the mame z80 core (even though we don't use it)
-void mw_z80_set_mem(Uint8 *mem)
+void mw_z80_set_mem(uint8_t *mem)
 {
 	OP_RAM = mem;	// set memory pointer to the beginning of our RAM
 	OP_ROM = mem;
 }
 #endif
 
-void mw_i86_set_mem(Uint8 *mem)
+void mw_i86_set_mem(uint8_t *mem)
 {
 	OP_RAM = mem;	// set memory pointer to the beginning of our RAM
 	OP_ROM = mem;
@@ -82,7 +82,7 @@ void mw_i86_set_mem(Uint8 *mem)
 UINT8 cpu_readmem16(UINT32 addr)
 {
 
-	return(g_game->cpu_mem_read(static_cast<Uint16>(addr)));
+	return(g_game->cpu_mem_read(static_cast<uint16_t>(addr)));
 
 }
 
@@ -95,7 +95,7 @@ UINT8 cpu_readmem20(UINT32 addr)
 // writes a byte to a memory location
 void cpu_writemem16(UINT32 addr, UINT8 value)
 {
-	g_game->cpu_mem_write(static_cast<Uint16>(addr), value);
+	g_game->cpu_mem_write(static_cast<uint16_t>(addr), value);
 }
 
 // writes a byte to a memory location
