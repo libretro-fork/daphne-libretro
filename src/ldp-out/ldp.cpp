@@ -30,12 +30,6 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
-#ifdef DEBUG
-#include <assert.h>
-#include "../io/numstr.h"
-#include "../cpu/cpu-debug.h"
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -268,10 +262,6 @@ bool ldp::pre_search(const char* pszFrame, bool block_until_search_finishes)
 	// If the user requested a delay before seeking, make it now
 	if (search_latency > 0)
 	{
-#ifdef DEBUG
-		// search latency needs to be reworked so that think() is getting called ...
-		assert(false);
-#endif
 //		make_delay(get_search_latency());
 		printline("WARNING : search latency needs to be redesigned, it is currently disabled");
 	}
@@ -583,11 +573,6 @@ void ldp::pre_pause()
 	// some games (Super Don) repeatedly flood with a pause command and this doesn't work well with the Hitachi
 	if (m_status == LDP_PLAYING)
 	{
-#ifdef DEBUG
-		string s = "m_uMsFrameBoundary is " + numstr::ToStr(m_uMsFrameBoundary) + ", elapsed ms is " +
-			numstr::ToStr(m_uElapsedMsSincePlay);
-		printline(s.c_str());
-#endif
 		m_last_seeked_frame = m_uCurrentFrame;
 		m_iSkipOffsetSincePlay = m_uCurrentOffsetFrame = m_uMsFrameBoundary = 0;
 		pause();
@@ -805,46 +790,6 @@ void ldp::pre_think()
 		}
 
 		// else the current frame has not changed
-
-#ifdef DEBUG
-#ifndef GP2X	// GP2X is slow enough that we don't want to do this safety check by default
-		// SAFETY CHECK
-		// This ensures that the number that is calculated is not far off what it should be.
-		// (this test is only meaningful if we are emulating a cpu, because otherwise we may deliberately
-		//  be calling this function slower than every 1 ms, such as ffr() or vldp's internal tests )
-		if (get_cpu_hz(0))
-		{
-			unsigned int uElapsedMS = elapsed_ms_time(m_play_time); // compute milliseconds
-			unsigned int time_result = m_last_seeked_frame + m_iSkipOffsetSincePlay +
-				(unsigned int) ((((Uint64) uElapsedMS) * g_game->get_disc_fpks()) / 1000000);
-			Uint16 diff = 0;
-
-			// this isn't necessarily the same as m_uCurrentFrame due to potential skips that can occur
-			// (this is updated immediately, m_uCurrentFrame is updated on a time boundary)
-			unsigned int uCurrentFrame = m_last_seeked_frame + m_iSkipOffsetSincePlay + m_uCurrentOffsetFrame;
-
-			if (uCurrentFrame > time_result) diff = uCurrentFrame - time_result;
-			else diff = time_result - uCurrentFrame;
-
-			// if the difference is noticeable, then alert the developer
-			if (diff > 5)
-			{
-				static unsigned int last_warning = 0;
-
-				if (elapsed_ms_time(last_warning) > 1000)
-				{
-					string s = "WARNING : cycle frame is ";
-					s += numstr::ToStr(uCurrentFrame) + " but time frame is ";
-					s += numstr::ToStr(time_result) + " which has a diff of ";
-					s += numstr::ToStr(diff);
-					printline(s.c_str());
-					last_warning = refresh_ms_time();
-				}
-			}
-		}
-#endif // not GP2X
-#endif // DEBUG
-
 	}
 	// otherwise the disc is idle, so we need not change the current frame
 
@@ -919,11 +864,6 @@ unsigned int ldp::get_current_frame()
 
 unsigned int ldp::get_adjusted_current_frame()
 {
-#ifdef DEBUG
-	// this function assumes that the disc's FPS is in line with vblank
-	assert((g_game->get_disc_fpks() << 1) == VBLANKS_PER_KILOSECOND);
-#endif // DEBUG
-
 	// because get_current_frame() is a virtual function
 	unsigned int uResult = get_current_frame();
 
@@ -965,10 +905,6 @@ int ldp::get_status()
 	// if we are in the middle of a search, find out if the search has completed
 	if (m_status == LDP_SEARCHING)
 	{
-#ifdef DEBUG
-		// verify that get_search_result() is not being called when it ought not be
-		assert(!m_dont_get_search_result);
-#endif
 		int stat = get_search_result();
 
 		// if the search was successful

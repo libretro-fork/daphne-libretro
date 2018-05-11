@@ -24,13 +24,12 @@
 #ifndef M80_INTERNAL_H
 #define M80_INTERNAL_H
 
+#include <stdint.h>
+
 // m80_internal.h
 // NOTE : This should not be #included by any other file than m80.cpp
 
-#include <SDL.h>
-// SDL.h is used to determine endianness and define some variable types
-// No actual SDL functions are used, so you can redefine your own variables
-// if you choose.
+#include <stdint.h>
 
 /* if we are integrating with daphne, define this */
 #define INTEGRATE 1
@@ -51,18 +50,19 @@
 typedef union
 {
 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+#ifdef MSB_FIRST
 	struct
 	{
-		Uint8 l,h;
+		uint8_t h, l;
 	} b;
 #else
 	struct
 	{
-		Uint8 h, l;
+		uint8_t l,h;
 	} b;
 #endif
-	Uint16 w;
+
+	uint16_t w;
 } m80_pair;
 
 /////////////////////////
@@ -70,13 +70,13 @@ typedef union
 struct m80_context
 {
 	m80_pair m80_regs[M80_REG_COUNT];	/* for quick access by m80_get_reg */
-	Uint8 halted;		/* whether the CPU is halted, waiting for an interrupt */
-	Uint8 interrupt_mode;	/* which IM we're in */
-	Uint8 IFF1;	/* interrupt flip-flop 1 */
-	Uint8 IFF2;	/* interrupt flip-flop 2 */
-	Uint8 irq_state;	/* whether IRQ line is asserted or cleared */
-	Uint8 nmi_state;	/* whether NMI line is asserted or cleared */
-	Uint8 got_EI;
+	uint8_t halted;		/* whether the CPU is halted, waiting for an interrupt */
+	uint8_t interrupt_mode;	/* which IM we're in */
+	uint8_t IFF1;	/* interrupt flip-flop 1 */
+	uint8_t IFF2;	/* interrupt flip-flop 2 */
+	uint8_t irq_state;	/* whether IRQ line is asserted or cleared */
+	uint8_t nmi_state;	/* whether NMI line is asserted or cleared */
+	uint8_t got_EI;
 	/* if this flag is true, no interrupts will be issued until after the next instruction */
 	/* EI masks all interrupts for the proceeding instruction */
 	/* (see Sean Young's undocumented z80 document for explanation of this behavior) */
@@ -163,11 +163,10 @@ struct m80_context
 #define M80_GET_WORD    M80_PEEK_WORD; PC += 2
 
 // peek a word but don't advance PC
-// (the 16-bit little endian stuff doesn't compile correctly using gcc 4 on the GP2X, so we use the slower method)
-#if (SDL_BYTEORDER == SDL_LIL_ENDIAN) && (!GP2X)
-#define M80_PEEK_WORD	*( (Uint16 *) ( (Uint8 *) (opcode_base + PC)))
-#else
+#ifdef MSB_FIRST
 #define M80_PEEK_WORD	(opcode_base[PC] | (opcode_base[PC+1] << 8))
+#else
+#define M80_PEEK_WORD	*( (uint16_t *) ( (uint8_t *) (opcode_base + PC)))
 #endif
 
 // Interrupt check macro
@@ -278,7 +277,7 @@ struct m80_context
 // Call macro
 #define M80_CALL	\
 	{	\
-		Uint16 destination = M80_GET_WORD;	\
+		uint16_t destination = M80_GET_WORD;	\
 		M80_PUSH16(M80_PC);	\
 		PC = destination;	\
 		M80_CHANGE_PC(PC);	\
@@ -351,18 +350,18 @@ struct m80_context
 #define M80_RLA	\
 {	\
 	/* use a temp variable greater than 8 bits so we can find out if there was a carry */	\
-	Uint32 result = ((A << 1) | (FLAGS & C_FLAG));	\
+	uint32_t result = ((A << 1) | (FLAGS & C_FLAG));	\
 	FLAGS &= (S_FLAG | Z_FLAG | P_FLAG);	\
 	FLAGS |= (result & (U5_FLAG | U3_FLAG));	\
 	FLAGS |= (result >> 8);	/* set carry flag if bit 8 of result is set */	\
-	A = (Uint8) result;	\
+	A = (uint8_t) result;	\
 }
 
 // Rotate Left - Hi bit goes into carry, carry goes into bit 0
 #define M80_RL(which_reg)	\
 	{	\
-		Uint32 temp = (which_reg << 1) | (FLAGS & C_FLAG);	\
-		which_reg = (Uint8) temp;	\
+		uint32_t temp = (which_reg << 1) | (FLAGS & C_FLAG);	\
+		which_reg = (uint8_t) temp;	\
 		FLAGS = m80_sz53p_flags[which_reg];	/* set carry to 0 and get S, Z and P flags */	\
 		FLAGS |= (temp >> 8); /* set carry to the value of the hi bit */	\
 	}
@@ -370,7 +369,7 @@ struct m80_context
 /* does an RL on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_RL_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_RL(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -379,17 +378,17 @@ struct m80_context
 // Rotate Right Accumulator - flags are different from RR A
 #define M80_RRA	\
 {	\
-	Uint8 result = (A >> 1) | (FLAGS << 7);	\
+	uint8_t result = (A >> 1) | (FLAGS << 7);	\
 	FLAGS &= (S_FLAG | Z_FLAG | P_FLAG);	\
 	FLAGS |= (A & 1);	\
 	FLAGS |= (result & (U5_FLAG | U3_FLAG));	\
-	A = (Uint8) result;	\
+	A = (uint8_t) result;	\
 }
 
 // Rotate Right - Bit 0 goes into carry, carry goes into Hi bit
 #define M80_RR(which_reg)	\
 	{	\
-		Uint8 new_carry = which_reg & C_FLAG;	\
+		uint8_t new_carry = which_reg & C_FLAG;	\
 		which_reg = (which_reg >> 1) | (FLAGS << 7);	\
 		FLAGS = m80_sz53p_flags[which_reg];	/* set carry to 0 and get S, Z and P flags */	\
 		FLAGS |= new_carry;	\
@@ -398,7 +397,7 @@ struct m80_context
 /* does an RR on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_RR_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_RR(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -419,7 +418,7 @@ struct m80_context
 /* does an RLC on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_RLC_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_RLC(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -430,7 +429,7 @@ struct m80_context
 	FLAGS &= (S_FLAG | Z_FLAG | P_FLAG);	\
 	FLAGS |= (A & C_FLAG);	\
 	A = (A << 7) | (A >> 1);	\
-	FLAGS |= (Uint8) (A & (U5_FLAG | U3_FLAG));	\
+	FLAGS |= (uint8_t) (A & (U5_FLAG | U3_FLAG));	\
 
 // Rotate Right Circular - Carry gets low-bit but is otherwise irrelevant to this operation
 #define M80_RRC(src_reg)	\
@@ -441,7 +440,7 @@ struct m80_context
 /* does an RRC on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_RRC_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_RRC(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -456,7 +455,7 @@ struct m80_context
 /* does an SLA on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_SLA_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_SLA(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -471,7 +470,7 @@ struct m80_context
 /* does an SLIA on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_SLIA_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_SLIA(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -485,7 +484,7 @@ struct m80_context
 
 #define M80_SRA_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_SRA(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -500,7 +499,7 @@ struct m80_context
 /* does an SRL on (IXIY + d) and on a register (undocumented instruction) */
 #define M80_SRL_COMBO(reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_SRL(val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -531,7 +530,7 @@ struct m80_context
 // a combo version of the reset instruction, for IXIY + d
 #define M80_RES_COMBO(bit, reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_RES(bit, val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -543,7 +542,7 @@ struct m80_context
 /* an IXIY combo version of the set instruction */
 #define M80_SET_COMBO(bit, reg, addr)	\
 {	\
-	Uint8 val = M80_READ_BYTE(addr);	\
+	uint8_t val = M80_READ_BYTE(addr);	\
 	M80_SET(bit, val);	\
 	M80_WRITE_BYTE(addr, val);	\
 	reg = val;	\
@@ -571,9 +570,9 @@ struct m80_context
 #else
 #define M80_ADD_REGS16(dest_reg, source_reg) \
 {	\
-	Uint32 result = dest_reg + source_reg;	\
-	Uint32 cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
-	dest_reg = (Uint16) result;	\
+	uint32_t result = dest_reg + source_reg;	\
+	uint32_t cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
+	dest_reg = (uint16_t) result;	\
 	AF = (AF & (0xFF00 | S_FLAG | Z_FLAG | V_FLAG)) |	\
 		((result >> 8) & (U3_FLAG | U5_FLAG)) |	\
 		(cbits & H_FLAG) |	\
@@ -613,8 +612,8 @@ struct m80_context
 // Subtract with carry for two 16-bit registers (dest_reg = dest_reg - source-reg - Carry)
 #define M80_SBC_REGS16(dest_reg, source_reg)	\
 {	\
-	Uint32 result = dest_reg - source_reg - (AF & C_FLAG);	\
-	Uint32 cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
+	uint32_t result = dest_reg - source_reg - (AF & C_FLAG);	\
+	uint32_t cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
 	dest_reg = result;	\
 	AF = (AF & ~0xff) | ((result >> 8) & 0xa8) |	\
 		(((result & 0xffff) == 0) << 6) |	\
@@ -653,8 +652,8 @@ struct m80_context
 #else
 #define M80_ADC_REGS16(dest_reg, source_reg) \
 {	\
-	Uint32 result = dest_reg + source_reg + (AF & C_FLAG);	\
-	Uint32 cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
+	uint32_t result = dest_reg + source_reg + (AF & C_FLAG);	\
+	uint32_t cbits = (dest_reg ^ source_reg ^ result) >> 8;	\
 	dest_reg = result;	\
 	AF = (AF & ~0xff) | ((result >> 8) & 0xa8) |	\
 		(((result & 0xffff) == 0) << 6) |	/* Z_FLAG */	\
@@ -688,13 +687,13 @@ struct m80_context
 #else
 #define M80_ADD_TO_A(which_reg)	\
 {	\
-	Uint32 sum = which_reg + A;	\
+	uint32_t sum = which_reg + A;	\
 		/* Overflow can only occur in addition if the signs of the operands are the same */	\
 		/* If new A's sign is different from old A's, and if the signs of the operands are the same, set V */	\
 	FLAGS = ((((sum ^ A) & (which_reg ^ A ^ 0x80)) >> 5) & V_FLAG);	/* clear N flag */ \
 	FLAGS |= ((sum ^ A ^ which_reg) & H_FLAG);	/* H_FLAG is set if 1 or all of the bit 4's are set */	\
 	FLAGS |= ((sum >> 8) & C_FLAG); /* if bit 8 of sum is set, set carry flag */	\
-	A = (Uint8) sum;	\
+	A = (uint8_t) sum;	\
 	FLAGS |= m80_sz53_flags[A];	/* set S, Z, 5 and 3 flags */	\
 }
 #endif
@@ -724,13 +723,13 @@ struct m80_context
 #else
 #define M80_ADC_TO_A(which_reg)	\
 {	\
-	Uint32 sum = which_reg + A + (FLAGS & C_FLAG);	\
+	uint32_t sum = which_reg + A + (FLAGS & C_FLAG);	\
 		/* Overflow can only occur in addition if the signs of the operands are the same */	\
 		/* If new A's sign is different from old A's, and if the signs of the operands are the same, set V */	\
 	FLAGS = ((((sum ^ A) & (which_reg ^ A ^ 0x80)) >> 5) & V_FLAG);	/* clear N flag */ \
 	FLAGS |= ((sum ^ A ^ which_reg) & H_FLAG);	/* H_FLAG is set if 1 or all of the bit 4's are set */	\
 	FLAGS |= ((sum >> 8) & C_FLAG); /* if bit 8 of sum is set, set carry flag */	\
-	A = (Uint8) sum;	\
+	A = (uint8_t) sum;	\
 	FLAGS |= m80_sz53_flags[A];	/* set S, Z, Y and X flags */	\
 }
 #endif
@@ -758,14 +757,14 @@ struct m80_context
 #else
 #define M80_SUB_FROM_A(which_reg)	\
 {	\
-	Uint32 diff = A - which_reg;	\
+	uint32_t diff = A - which_reg;	\
 	FLAGS = N_FLAG;	/* N_FLAG always gets set when subtracting */	\
 		/* Overflow can only occur in subtraction if the signs of the operands are different */	\
 		/* If new A's sign is different from old A's, and if the signs of the operands are different, set V */	\
 	FLAGS |= ((((diff ^ A) & (which_reg ^ A)) >> 5) & V_FLAG);	\
 	FLAGS |= ((diff ^ A ^ which_reg) & H_FLAG);	/* H_FLAG is set if 1 or all of the bit 4's are set */	\
 	FLAGS |= ((diff >> 8) & C_FLAG); /* if bit 8 of diff is set, set carry flag */	\
-	A = (Uint8) diff;	\
+	A = (uint8_t) diff;	\
 	FLAGS |= m80_sz53_flags[A];	/* set S, Z, Y and X flags */	\
 }
 #endif
@@ -794,14 +793,14 @@ struct m80_context
 #else
 #define M80_SBC_FROM_A(which_reg)	\
 {	\
-	Uint32 diff = A - which_reg - (FLAGS & C_FLAG);	\
+	uint32_t diff = A - which_reg - (FLAGS & C_FLAG);	\
 	FLAGS = N_FLAG;	/* N_FLAG always gets set when subtracting */	\
 		/* Overflow can only occur in subtraction if the signs of the operands are different */	\
 		/* If new A's sign is different from old A's, and if the signs of the operands are different, set V */	\
 	FLAGS |= ((((diff ^ A) & (which_reg ^ A)) >> 5) & V_FLAG);	\
 	FLAGS |= ((diff ^ A ^ which_reg) & H_FLAG);	/* H_FLAG is set if 1 or all of the bit 4's are set */	\
 	FLAGS |= ((diff >> 8) & C_FLAG); /* if bit 8 of diff is set, set carry flag */	\
-	A = (Uint8) diff;	\
+	A = (uint8_t) diff;	\
 	FLAGS |= m80_sz53_flags[A];	/* set S, Z, 5 and 3 flags */	\
 }
 #endif
@@ -827,8 +826,8 @@ struct m80_context
 #else
 #define M80_COMPARE_WITH_A(which_reg)	\
 {	\
-	Uint32 sum = A - which_reg;	\
-	Uint32 cbits = A ^ which_reg ^ sum;	\
+	uint32_t sum = A - which_reg;	\
+	uint32_t cbits = A ^ which_reg ^ sum;	\
 		AF = (AF & ~0xff) | (sum & 0x80) |	\
 			(((sum & 0xff) == 0) << 6) | (which_reg & 0x28) |	\
 			(((cbits >> 6) ^ (cbits >> 5)) & 4) | 2 |	\
@@ -857,7 +856,7 @@ struct m80_context
 // macro to swap AF with AF'
 #define M80_EX_AFS	\
 {	\
-	Uint16 tmp = AFPRIME;	\
+	uint16_t tmp = AFPRIME;	\
 	AFPRIME = AF;	\
 	AF = tmp;	\
 }
@@ -865,7 +864,7 @@ struct m80_context
 // macro to swap HL and DE
 #define M80_EX_DEHL	\
 {	\
-	Uint16 temp;	\
+	uint16_t temp;	\
 	temp = HL;	\
 	HL = DE;	\
 	DE = temp;	\
@@ -873,17 +872,17 @@ struct m80_context
 
 // compliment A
 #define M80_CPL	\
-	A = (Uint8) (A ^ 0xFF);	\
-	FLAGS &= (Uint8) (S_FLAG | Z_FLAG | P_FLAG | C_FLAG );	\
-	FLAGS |= (Uint8) (H_FLAG | N_FLAG);	\
-	FLAGS |= (Uint8) (A & (U5_FLAG | U3_FLAG));	\
+	A = (uint8_t) (A ^ 0xFF);	\
+	FLAGS &= (uint8_t) (S_FLAG | Z_FLAG | P_FLAG | C_FLAG );	\
+	FLAGS |= (uint8_t) (H_FLAG | N_FLAG);	\
+	FLAGS |= (uint8_t) (A & (U5_FLAG | U3_FLAG));	\
 	/* see Sean Young's z80 doc for more info about how CPL behaves */
 
 // set carry flag
 #define M80_SCF	\
-	FLAGS &= (Uint8) (S_FLAG | Z_FLAG | P_FLAG);	\
+	FLAGS &= (uint8_t) (S_FLAG | Z_FLAG | P_FLAG);	\
 	FLAGS |= C_FLAG;	\
-	FLAGS |= (Uint8) (A & (U5_FLAG | U3_FLAG));
+	FLAGS |= (uint8_t) (A & (U5_FLAG | U3_FLAG));
 
 // compliment carry flag
 #define M80_CCF	\
@@ -895,7 +894,7 @@ struct m80_context
 // Exchange most of the registers (EXX)
 #define M80_EXX	\
 {	\
-	Uint16 temp = BC;	\
+	uint16_t temp = BC;	\
 	BC = BCPRIME;	\
 	BCPRIME = temp;	\
 	temp = DE;	\
@@ -978,7 +977,7 @@ struct m80_context
 
 #define M80_LDI	\
 	{	\
-		Uint8 temp = M80_READ_BYTE(HL);	\
+		uint8_t temp = M80_READ_BYTE(HL);	\
 		M80_WRITE_BYTE(DE, temp);	\
 		DE++;	\
 		HL++;	\
@@ -996,8 +995,8 @@ struct m80_context
 // macro for the CPI instruction
 #define M80_CPI \
 	{	\
-		Uint32 temp = M80_READ_BYTE(HL);	\
-		Uint32 cbits, sum;	\
+		uint32_t temp = M80_READ_BYTE(HL);	\
+		uint32_t cbits, sum;	\
 		++HL;	\
 		sum = A - temp;	\
 		cbits = A ^ temp ^ sum;	\
@@ -1011,8 +1010,8 @@ struct m80_context
 
 #define M80_CPIR	\
 {	\
-	Uint32 acu = A;	\
-	Uint32 temp, op, sum, cbits;	\
+	uint32_t acu = A;	\
+	uint32_t temp, op, sum, cbits;	\
 	BC &= 0xffff;	\
 	do {	\
 		temp = M80_READ_BYTE(HL); ++HL;	\
@@ -1029,8 +1028,8 @@ struct m80_context
 }
 
 #define M80_CPD {													\
-	Uint8 val = M80_READ_BYTE(HL);										\
-	Uint8 res = A - val;										\
+	uint8_t val = M80_READ_BYTE(HL);										\
+	uint8_t res = A - val;										\
 	HL--; BC--;												\
 	FLAGS = (FLAGS & C_FLAG) | (m80_sz53_flags[res] & ~(U5_FLAG|U3_FLAG))	\
 		| ((A ^ val ^ res) & H_FLAG) | N_FLAG;  \
@@ -1042,10 +1041,10 @@ struct m80_context
 
 #define M80_CPDR	\
 {	\
-	Uint32 temp;	\
-	Uint32 op;	\
-	Uint32 sum;	\
-	Uint32 cbits;	\
+	uint32_t temp;	\
+	uint32_t op;	\
+	uint32_t sum;	\
+	uint32_t cbits;	\
 	do {	\
 		temp = M80_READ_BYTE(HL);	\
 		--HL;	\
@@ -1064,7 +1063,7 @@ struct m80_context
 // macro for LDD instruction
 #define M80_LDD	\
 {	\
-	Uint8 acu = M80_READ_BYTE(HL);	\
+	uint8_t acu = M80_READ_BYTE(HL);	\
 	--HL;	\
 	M80_WRITE_BYTE(DE, acu);	\
 	--DE;	\
@@ -1076,7 +1075,7 @@ struct m80_context
 // macro for LDDR instruction
 #define M80_LDDR	\
 {	\
-	Uint8 acu;	\
+	uint8_t acu;	\
 	BC &= 0xffff;	\
 	do	\
 	{	\

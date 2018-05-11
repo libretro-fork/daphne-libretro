@@ -88,9 +88,7 @@ char con_getkey()
 				// so lazy folks (like me) can pass the issues screen
 				// without going to the keyboard :)
 				case SDL_JOYBUTTONDOWN:
-#ifndef GP2X
 					result = 13;
-#else
 					// one of the buttons needs to exit the emulator
 					switch(event.jbutton.button)
 						{
