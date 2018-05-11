@@ -20,6 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdint.h>
+
 // ssi263.h
 // by Matt Ownby
 // Speech synthesis via rsysnth by Garry Jordan
@@ -30,10 +32,10 @@
 // Buffer set aside in game RAM to hold SSI-263 speech text.
 #define SSI_PHRASE_BUF_LEN 256
 	
-void ssi263_reg0(unsigned char value, Uint8 *irq_status);
+void ssi263_reg0(unsigned char value, uint8_t *irq_status);
 void ssi263_reg1(unsigned char value);
 void ssi263_reg2(unsigned char value);
 void ssi263_reg3(unsigned char value);
 void ssi263_reg4(unsigned char value);
 bool ssi263_init(bool init_speech);
-void ssi263_finished_callback(Uint8 *pu8Buf, unsigned int uSlot);
+void ssi263_finished_callback(uint8_t *pu8Buf, unsigned int uSlot);

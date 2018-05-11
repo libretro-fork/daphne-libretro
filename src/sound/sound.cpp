@@ -29,6 +29,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "SDL.h"
@@ -62,15 +63,15 @@ struct sounddef *g_soundchip_head = NULL;	// pointer to the first sound chip in 
 unsigned int g_uSoundChipNextID = 0;	// the idea that the next soundchip to get added will get (also usually indicates how many sound chips have been added, but not if a soundchip gets deleted)
 
 // callback to actually do the mixing
-void (*g_soundmix_callback)(Uint8* stream, int length) = mixNone;
+void (*g_soundmix_callback)(uint8_t* stream, int length) = mixNone;
 
 // The # of samples in the sound buffer
 // Matt prefers 1024 but some people (cough Warren) can't handle it haha
 //  but now it can be changed from the command line
 // RJS HERE - default buffer samples here, needs ntsc/pal calculation
 // 2017.09.18 - RJS - This needs to be calculated for PAL (/50) or (/60).
-// APK Uint16 g_u16SoundBufSamples = 2048;
-Uint16 g_u16SoundBufSamples = 44100 / 60;
+// APK uint16_t g_u16SoundBufSamples = 2048;
+uint16_t g_u16SoundBufSamples = 44100 / 60;
 
 // # of bytes each individual sound chip should be allocated for its buffer
 unsigned int g_uSoundChipBufSize = g_u16SoundBufSamples * AUDIO_BYTES_PER_SAMPLE;
@@ -110,7 +111,7 @@ void set_sound_mute(bool bMuted)
 }
 // end edit
 
-void set_soundbuf_size(Uint16 newbufsize)
+void set_soundbuf_size(uint16_t newbufsize)
 {
 	g_u16SoundBufSamples = newbufsize;
 	g_uSoundChipBufSize = newbufsize * AUDIO_BYTES_PER_SAMPLE;
@@ -120,7 +121,7 @@ void set_soundbuf_size(Uint16 newbufsize)
 	while (cur)
 	{
 		delete cur->buffer;
-		cur->buffer = new Uint8 [g_uSoundChipBufSize];
+		cur->buffer = new uint8_t [g_uSoundChipBufSize];
       memset(cur->buffer, 0, g_uSoundChipBufSize);
 		cur->buffer_pointer = cur->buffer;
 		cur->bytes_left = g_uSoundChipBufSize;
@@ -137,7 +138,7 @@ bool sound_init()
 	bool result = false;
 	int audio_rate = AUDIO_FREQ; // rate to mix audio at.  This cannot be changed without resampling all .wav's and all .ogg's
 	
-	Uint16 audio_format = AUDIO_FORMAT;
+	uint16_t audio_format = AUDIO_FORMAT;
 	int audio_channels = AUDIO_CHANNELS;
 	
 	printline("Initializing sound system ... ");
@@ -263,7 +264,7 @@ void sound_shutdown()
 }
 
 // plays a sample, returns true on success
-bool sound_play(Uint32 whichone)
+bool sound_play(uint32_t whichone)
 {	
 	bool result = false;
 	
@@ -297,7 +298,7 @@ bool sound_play_saveme()
 int load_waves()
 {
 	
-	Uint32 i = 0;
+	uint32_t i = 0;
 	int result = 1;
 	string filename = "";
 	SDL_AudioSpec spec;
@@ -439,7 +440,7 @@ unsigned int add_soundchip(struct sounddef *candidate)
 	cur->next_soundchip = NULL;
 	cur->bNeedsConstantUpdates = false;	// sensible default
 	// create a buffer for each chip
-	cur->buffer = new Uint8 [g_uSoundChipBufSize];
+	cur->buffer = new uint8_t [g_uSoundChipBufSize];
 	cur->buffer_pointer = cur->buffer;
 	cur->bytes_left = g_uSoundChipBufSize;
 	cur->init_callback = NULL;
@@ -588,14 +589,14 @@ void init_soundchip()
 
 // Mixing callback
 // USED WHEN : all audio is muted
-void mixMute(Uint8 *stream, int length)
+void mixMute(uint8_t *stream, int length)
 {
 	memset(stream, 0, length);
 }
 
 // Mixing callback
 // USED WHEN: there is only 1 sound chip, then there is no need to do any mixing
-void mixNone(Uint8 *stream, int length)
+void mixNone(uint8_t *stream, int length)
 {
 	if (g_soundchip_head != NULL)
 	{
@@ -605,7 +606,7 @@ void mixNone(Uint8 *stream, int length)
 
 // Mixing callback
 // USED WHEN: there are more than 1 sound chip, but all volumes are maximum
-void mixWithMaxVolume(Uint8 *stream, int length)
+void mixWithMaxVolume(uint8_t *stream, int length)
 {
 #ifdef DEBUG
 	assert(g_soundchip_head);
@@ -638,7 +639,7 @@ void mixWithMaxVolume(Uint8 *stream, int length)
 		DO_CLIP(mixed_sample_2);
 
 		// note: sample2 needs to be on top because this is little endian, hence LSB
-		Uint32 val_to_store = (((Uint16) mixed_sample_2) << 16) | (Uint16) mixed_sample_1;
+		uint32_t val_to_store = (((uint16_t) mixed_sample_2) << 16) | (uint16_t) mixed_sample_1;
 
 		STORE_LIL_UINT32(stream, val_to_store);
 		stream += 4;
@@ -649,7 +650,7 @@ void mixWithMaxVolume(Uint8 *stream, int length)
 // Mixing callback
 // USED WHEN: there are more than 1 sound chip, and volumes are variable
 //  (this is the slowest callback)
-void mixWithMults(Uint8 *stream, int length)
+void mixWithMults(uint8_t *stream, int length)
 {
 	struct sounddef *cur;
 
@@ -671,13 +672,13 @@ void mixWithMults(Uint8 *stream, int length)
 		DO_CLIP(mixed_sample_1);
 		DO_CLIP(mixed_sample_2);
 
-		Uint32 val_to_store = (((Uint16) mixed_sample_2) << 16) | (Uint16) mixed_sample_1;
+		uint32_t val_to_store = (((uint16_t) mixed_sample_2) << 16) | (uint16_t) mixed_sample_1;
 		STORE_LIL_UINT32(stream, val_to_store);
 		stream += 4;
 	}
 }
 
-void audio_callback ( void *data, Uint8 *stream, int length )
+void audio_callback ( void *data, uint8_t *stream, int length )
 {
 	// now go through the sound chips and mix them in
 	struct sounddef *cur = g_soundchip_head;
@@ -698,7 +699,7 @@ void audio_callback ( void *data, Uint8 *stream, int length )
 	g_soundmix_callback(stream, length);
 }
 
-void audio_writedata(Uint8 id, Uint8 data)
+void audio_writedata(uint8_t id, uint8_t data)
 {
 	// if sound isn't initialized, then the soundchips aren't initialized either
 	if (g_sound_initialized)
@@ -718,7 +719,7 @@ void audio_writedata(Uint8 id, Uint8 data)
 }
 
 // in case audio_writedata doesn't cut it ...
-void audio_write_ctrl_data(unsigned int uCtrl, unsigned int uData, Uint8 id)
+void audio_write_ctrl_data(unsigned int uCtrl, unsigned int uData, uint8_t id)
 {
 	// if sound isn't initialized, then the soundchips aren't initialized either
 	if (g_sound_initialized)
@@ -737,7 +738,7 @@ void audio_write_ctrl_data(unsigned int uCtrl, unsigned int uData, Uint8 id)
 	}
 }
 
-void set_soundchip_volume(Uint8 id, unsigned int uChannel, unsigned int uVolume)
+void set_soundchip_volume(uint8_t id, unsigned int uChannel, unsigned int uVolume)
 {
 	struct sounddef *cur = g_soundchip_head;
 	while (cur)
