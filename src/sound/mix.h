@@ -48,8 +48,8 @@ void mix_c();
 // here is where we go if we're not using MMX
 
 extern mix_s *g_pMixBufs;
-extern Uint8 *g_pSampleDst;
-extern Uint32 g_uBytesToMix;
+extern uint8_t *g_pSampleDst;
+extern uint32_t g_uBytesToMix;
 #define g_mix_func mix_c
 
 /////////////////////////////

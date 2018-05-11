@@ -22,6 +22,8 @@
 
 // This code is to interface the Daphne sound system with tms9919-sdl.cpp
 
+#include <stdint.h>
+
 #ifdef DEBUG
 #include <assert.h>
 #endif
@@ -41,7 +43,7 @@ int g_uTMS9919Index = 0;
 
 // returns the internal index of the sound chip that has just been created
 //  (so that it can be referenced quickly)
-int tms9919_initialize(Uint32 core_frequency)
+int tms9919_initialize(uint32_t core_frequency)
 {
 	int result = -1;
 
@@ -55,7 +57,7 @@ int tms9919_initialize(Uint32 core_frequency)
 	return result;
 }
 
-void tms9919_writedata(Uint8 data, int index)
+void tms9919_writedata(uint8_t data, int index)
 {
 #ifdef DEBUG
 	assert((index >= 0) && (index < g_uTMS9919Index));
@@ -63,7 +65,7 @@ void tms9919_writedata(Uint8 data, int index)
 	g_paSoundChips[index]->WriteData(data);
 }
 
-void tms9919_stream(Uint8* stream, int length, int index)
+void tms9919_stream(uint8_t* stream, int length, int index)
 {
 #ifdef DEBUG
 	assert((index >= 0) && (index < g_uTMS9919Index));

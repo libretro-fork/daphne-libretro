@@ -45,7 +45,7 @@ bool g_bWaitFreqLow = false;
 
 // max sample value (gets negated repeatedly)
 // Using the absolute max (32767) seemed to loud, so I halved it.  Feel free to play with this.
-Sint16 g_s16SampleVal = 16384;
+int16_t g_s16SampleVal = 16384;
 
 // how many samples have been converted (used to maintain consistency)
 unsigned int g_uSampleCount = 0;
@@ -54,7 +54,7 @@ unsigned int g_uSampleCount = 0;
 unsigned int g_uSamplesPerHalfCycle = 0;
 
 // init callback
-int beeper_init(Uint32 unused)
+int beeper_init(uint32_t unused)
 {
 
 #ifdef DEBUG
@@ -132,8 +132,8 @@ void beeper_get_stream(Uint8 *stream, int length, int internal_id)
 		{
 			// endian-independent! :)
 			// NOTE : assumes stream is in little endian format
-			stream[byte_pos] = stream[byte_pos+2] = ((Uint16) g_s16SampleVal) & 0xFF;
-			stream[byte_pos+1] = stream[byte_pos+3] = (((Uint16) g_s16SampleVal) >> 8) & 0xFF;
+			stream[byte_pos] = stream[byte_pos+2] = ((uint16_t) g_s16SampleVal) & 0xFF;
+			stream[byte_pos+1] = stream[byte_pos+3] = (((uint16_t) g_s16SampleVal) >> 8) & 0xFF;
 
 			++g_uSampleCount;	// we've just done 1 sample (4 bytes/sample)
 

@@ -65,7 +65,7 @@ void tonegen_stream(uint8_t* stream, int length, int index)
 	{
 		// endian-independent! :)
 		// NOTE : assumes stream is in little endian format
-		Sint16 sample = 0;
+		int16_t sample = 0;
 		int channel = 0;
 		for (channel = 0; channel < VOICES; channel++)
 		{

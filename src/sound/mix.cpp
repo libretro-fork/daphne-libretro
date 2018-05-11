@@ -22,6 +22,8 @@
 
 // mix.cpp
 
+#include <stdint.h>
+
 #include "sound.h"
 #include "../io/mpo_mem.h"
 #include "mix.h"
@@ -33,16 +35,16 @@
 // if we aren't using the MMX version
 
 struct mix_s *g_pMixBufs = NULL;
-Uint8 *g_pSampleDst = 0;
+uint8_t *g_pSampleDst = 0;
 unsigned int g_uBytesToMix = 0;
 
 // A C version of mix_mmx
 // mix_mmx is 2.5 times as fast on Pentium 4
 // NOTE : we always want this defined, even when using MMX, for the purpose of testing (see releasetest)
-void mix_c()
+void mix_c(void)
 {
 	unsigned int uSamplesToMix = g_uBytesToMix >> 1;
-	Uint8 *stream = g_pSampleDst;
+	uint8_t *stream = g_pSampleDst;
 	unsigned int sample = 0, val_to_store = 0;
 
 	for (sample = 0; sample < uSamplesToMix; sample += 2)
@@ -53,8 +55,8 @@ void mix_c()
 		// mix all sound chips
 		while (cur)
 		{
-			mixed_sample_1 += LOAD_LIL_SINT16(((short *) cur->pMixBuf) + sample);
-			mixed_sample_2 += LOAD_LIL_SINT16(((short *) cur->pMixBuf) + sample + 1);
+			mixed_sample_1 += LOAD_LIL_SINT16(((int16_t *) cur->pMixBuf) + sample);
+			mixed_sample_2 += LOAD_LIL_SINT16(((int16_t *) cur->pMixBuf) + sample + 1);
 			cur = cur->pNext;
 		}
 
@@ -63,7 +65,7 @@ void mix_c()
 
 		// note: sample2 needs to be on top because this is little endian, hence LSB
 		val_to_store = 
-			(((unsigned short) mixed_sample_2) << 16) | ((unsigned short) mixed_sample_1);
+			(((uint16_t) mixed_sample_2) << 16) | ((uint16_t) mixed_sample_1);
 
 		STORE_LIL_UINT32(stream, val_to_store);
 		stream += 4;
