@@ -140,14 +140,6 @@ void releasetest::start()
 	if (dotest(m_test_gp2x_timer)) test_gp2x_timer();
 #endif // GP2X
 
-	// Only test these functions if we've built with MMX code,
-	//  otherwise the test is useless
-#ifdef USE_MMX
-	if (dotest(m_test_rgb2yuv)) test_rgb2yuv();
-	if (dotest(m_test_blend)) test_blend();
-	if (dotest(m_test_mix)) test_mix();
-#endif // USE_MMX
-
 #ifdef USE_OPENGL
 	if (dotest(m_test_gl_offset)) test_gl_offset();
 #endif
