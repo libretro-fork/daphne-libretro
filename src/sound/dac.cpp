@@ -36,7 +36,7 @@
 unsigned int g_uDACCount = 0;
 
 // lookup table to convert 8-bit unsigned sound data to 16-bit signed sound data
-Sint16 g_DACTable[256];
+int16_t g_DACTable[256];
 
 // the sample val that is currently active
 unsigned int g_u8DACVal = 0;
@@ -155,7 +155,7 @@ void dac_ctrl_data(unsigned int uCyclesSinceLastChange, unsigned int u8Byte, int
 }
 
 // called from sound mixer to get audio stream
-void dac_get_stream(Uint8 *stream, int length, int internal_id)
+void dac_get_stream(uint8_t *stream, int length, int internal_id)
 {
 #ifdef DEBUG
 	// make sure this is in the proper format (stereo 16-bit)
@@ -165,7 +165,7 @@ void dac_get_stream(Uint8 *stream, int length, int internal_id)
 	/*
 	if (g_uDACSampleCount > 45)
 	{
-		Uint64 total_cycs = get_total_cycles_executed(1);
+		uint64_t total_cycs = get_total_cycles_executed(1);
 		string s = "total cycles for CPU #1 is " + numstr::ToStr(total_cycs) +
 			" and the sample count is " + numstr::ToStr(g_uDACSampleCount);
 		printline(s.c_str());
@@ -178,7 +178,7 @@ void dac_get_stream(Uint8 *stream, int length, int internal_id)
 
 	while (pos < length)
 	{
-		Sint16 mono_sample;	// just one sample value from -32768 to 32767
+		int16_t mono_sample;	// just one sample value from -32768 to 32767
 
 		// if we have some buffered audio samples to be used
 		if (buf_idx < g_uDACSampleCount)
@@ -193,7 +193,7 @@ void dac_get_stream(Uint8 *stream, int length, int internal_id)
 			++g_uDACSamplesWOBuf;
 		}
 
-		Uint32 uSample = (Uint32) ((((Uint16) mono_sample) << 16) | (Uint16) mono_sample);	// convert to stereo
+		uint32_t uSample = (uint32_t) ((((uint16_t) mono_sample) << 16) | (uint16_t) mono_sample);	// convert to stereo
 
 #ifdef OUT_RAW
 		if (stream_io) mpo_write(&uSample, sizeof(uSample), NULL, stream_io);

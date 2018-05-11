@@ -25,7 +25,7 @@
 #ifndef MIX_H
 #define MIX_H
 
-#include <SDL.h>	// for datatype defs
+#include <stdint.h>
 
 // IMPORTANT: the MMX code depends on this structure beginning as it is displayed here!
 // Be very cautious about changing this struct!

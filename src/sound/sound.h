@@ -24,7 +24,6 @@
 #define SOUND_H
 
 #include <stdint.h>
-#include <SDL.h>
 
 // header file for sound.c
 

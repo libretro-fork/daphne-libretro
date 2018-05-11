@@ -23,15 +23,15 @@
 #ifndef DAC_H
 #define DAC_H
 
-#include <SDL.h>	// for data-type defs
+#include <stdint.h>
 
 // init callback
-int dac_init(Uint32 unused);
+int dac_init(uint32_t unused);
 
 // should be called from the game driver
 void dac_ctrl_data(unsigned int uSamplesSinceLastChange, unsigned int uByte, int internal_id);
 
 // called from sound mixer to get audio stream
-void dac_get_stream(Uint8 *stream, int length, int internal_id);
+void dac_get_stream(uint8_t *stream, int length, int internal_id);
 
 #endif // DAC_H

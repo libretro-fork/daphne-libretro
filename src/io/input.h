@@ -23,6 +23,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <stdint.h>
+
 enum
 {
 	SWITCH_UP,
@@ -62,8 +64,8 @@ enum
 struct coin_input
 {
 	bool coin_enabled;	//	whether the coin was enabled or disabled
-	Uint8 coin_val;	// either SWITCH_COIN1 or SWITCH_COIN2
-	Uint64 cycles_when_to_enable;	// the cycle count that we must have surpassed in order to be able to enable the coin
+	uint8_t coin_val;	// either SWITCH_COIN1 or SWITCH_COIN2
+	uint64_t cycles_when_to_enable;	// the cycle count that we must have surpassed in order to be able to enable the coin
 };
 
 ////////////////////////
@@ -97,9 +99,9 @@ bool get_consoledown();
 void set_consoledown(bool);
 void check_console_refresh();
 bool input_pause(bool fPaused);
-void input_enable(Uint8);
-void input_disable(Uint8);
-inline void add_coin_to_queue(bool enabled, Uint8 val);
+void input_enable(uint8_t);
+void input_disable(uint8_t);
+inline void add_coin_to_queue(bool enabled, uint8_t val);
 void reset_idle(void); // added by JFA
 void set_use_joystick(bool val);
 

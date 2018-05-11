@@ -32,9 +32,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "SDL.h"
-#include "SDL_audio.h"
-
 #include "sound.h"
 #include "sn_intf.h"
 #include "pc_beeper.h"
@@ -86,14 +83,6 @@ int cur_wave = 0;	// the current wave being played (0 to NUM_DL_BEEPS-1)
 bool g_sound_initialized = false;	// whether the sound will work if we try to play it
 
 // Macros to help automatically verify that our locks and unlocks are correct
-#ifdef DEBUG
-bool g_bAudioLocked = false;
-#define LOCK_AUDIO assert (!g_bAudioLocked); g_bAudioLocked = true; SDL_LockAudio
-#define UNLOCK_AUDIO assert (g_bAudioLocked); g_bAudioLocked = false; SDL_UnlockAudio
-#else
-#define LOCK_AUDIO SDL_LockAudio
-#define UNLOCK_AUDIO SDL_UnlockAudio
-#endif // lock audio macros
 
 // added by JFA for -startsilent
 void set_sound_mute(bool bMuted)
@@ -103,10 +92,8 @@ void set_sound_mute(bool bMuted)
 	// only proceed if sound has been initialized
 	if (g_sound_initialized)
 	{
-		LOCK_AUDIO();
 		// this should set the mixing callback back to something that isn't muted
 		update_soundchip_volumes();
-		UNLOCK_AUDIO();
 	}
 }
 // end edit
@@ -399,8 +386,6 @@ bool is_sound_enabled()
 // NOTE : this is called by the game driver, so it can be called even if sound is disabled
 unsigned int add_soundchip(struct sounddef *candidate)
 {
-	LOCK_AUDIO();	// safety precaution, we don't want callback running during this function
-
 	struct sounddef *cur = NULL;
 	
 	// if this is the first sound chip to be added to the list
@@ -505,8 +490,6 @@ unsigned int add_soundchip(struct sounddef *candidate)
 	// NOTE : this should come last in this function
 	update_soundchip_volumes();
 
-	UNLOCK_AUDIO();
-
 	return cur->id;
 }
 
@@ -516,7 +499,6 @@ bool delete_soundchip(unsigned int id)
 	struct sounddef *cur = g_soundchip_head;
 	struct sounddef *prev = NULL;
 
-	LOCK_AUDIO();
 	// if 1 or more sound chips exists ...
 	while (cur)
 	{
@@ -553,7 +535,6 @@ bool delete_soundchip(unsigned int id)
 		prev = cur;
 		cur = cur->next_soundchip;
 	}
-	UNLOCK_AUDIO();
 	
 	return bSuccess;
 }
@@ -563,7 +544,6 @@ void init_soundchip()
 #ifdef DEBUG
 	assert(is_sound_enabled());
 #endif
-	LOCK_AUDIO();	// safety precaution, we don't want callback running during this function
 	if (g_soundchip_head)
 	{
 		struct sounddef *cur = g_soundchip_head;
@@ -584,7 +564,6 @@ void init_soundchip()
 			cur = cur->next_soundchip;
 		}
 	}
-	UNLOCK_AUDIO();
 }
 
 // Mixing callback
@@ -704,7 +683,6 @@ void audio_writedata(uint8_t id, uint8_t data)
 	// if sound isn't initialized, then the soundchips aren't initialized either
 	if (g_sound_initialized)
 	{
-		LOCK_AUDIO();	// safety precaution, we don't want callback running during this function
 		struct sounddef *cur = g_soundchip_head;
 		while (cur)
 		{
@@ -714,7 +692,6 @@ void audio_writedata(uint8_t id, uint8_t data)
 			}      
 			cur = cur->next_soundchip;
 		}
-		UNLOCK_AUDIO();
 	}
 }
 
@@ -724,7 +701,6 @@ void audio_write_ctrl_data(unsigned int uCtrl, unsigned int uData, uint8_t id)
 	// if sound isn't initialized, then the soundchips aren't initialized either
 	if (g_sound_initialized)
 	{
-		LOCK_AUDIO();
 		struct sounddef *cur = g_soundchip_head;
 		while (cur)
 		{
@@ -734,7 +710,6 @@ void audio_write_ctrl_data(unsigned int uCtrl, unsigned int uData, uint8_t id)
 			}
 			cur = cur->next_soundchip;
 		}
-		UNLOCK_AUDIO();
 	}
 }
 
@@ -761,9 +736,7 @@ void set_soundchip_volume(struct sounddef *cur, unsigned int uChannel, unsigned 
 		if (uVolume <= AUDIO_MAX_VOLUME)
 		{
 			cur->uDriverVolume[uChannel] = uVolume;
-			LOCK_AUDIO();
 			update_soundchip_volumes();
-			UNLOCK_AUDIO();
 		}
 		else
 		{
@@ -785,9 +758,7 @@ void set_soundchip_vldp_volume(unsigned int uVolume)
 	if (uVolume <= AUDIO_MAX_VOLUME)
 	{
 		g_uVolumeVLDP = uVolume;
-		LOCK_AUDIO();
 		update_soundchip_volumes();
-		UNLOCK_AUDIO();
 	}
 	else
 	{
@@ -800,9 +771,7 @@ void set_soundchip_nonvldp_volume(unsigned int uVolume)
 	if (uVolume <= AUDIO_MAX_VOLUME)
 	{
 		g_uVolumeNonVLDP = uVolume;
-		LOCK_AUDIO();
 		update_soundchip_volumes();
-		UNLOCK_AUDIO();
 	}
 	else
 	{
@@ -885,7 +854,6 @@ void shutdown_soundchip()
 #ifdef DEBUG
 	assert(g_sound_initialized);
 #endif
-	LOCK_AUDIO();	// safety precaution, we don't want callback running during this function
 	struct sounddef *cur = g_soundchip_head;
 	while (cur)
 	{
@@ -899,7 +867,6 @@ void shutdown_soundchip()
 		delete [] temp->buffer;
 		delete temp;
 	}
-	UNLOCK_AUDIO();	
 
 	// RJS ADD START
 	g_soundchip_head = NULL;
@@ -913,7 +880,6 @@ void update_soundbuffer()
 	if (g_sound_initialized)
 	{
 		// to ensure that the audio callback doesn't get called while we're in this function
-		LOCK_AUDIO();
 		struct sounddef *cur = g_soundchip_head;
 		while (cur)
 		{
@@ -932,6 +898,5 @@ void update_soundbuffer()
 			// else doesn't need to be updated so often, so don't do it ...
 			cur = cur->next_soundchip;
 		}
-		UNLOCK_AUDIO();
 	}
 }

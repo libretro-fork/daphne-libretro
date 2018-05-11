@@ -30,4 +30,18 @@ SOURCES_C   := $(DEPS_DIR)/libogg/src/bitwise.c \
 					$(DEPS_DIR)/libvorbis/lib/vorbisfile.c \
 					$(DEPS_DIR)/libvorbis/lib/window.c \
 
-SOURCES_CXX :=
+SOURCES_CXX := 
+
+#SOURCES_CXX += $(CORE_DIR)/src/io/cmdline.cpp
+
+SOURCES_CXX += $(CORE_DIR)/src/sound/dac.cpp
+SOURCES_CXX += $(CORE_DIR)/src/sound/gisound.cpp
+SOURCES_CXX += $(CORE_DIR)/src/sound/mix.cpp
+SOURCES_CXX += $(CORE_DIR)/src/sound/pc_beeper.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/sound/samples.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/sound/sn_intf.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/sound/sound.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/sound/ssi263.cpp
+SOURCES_CXX += $(CORE_DIR)/src/sound/tms9919.cpp
+SOURCES_CXX += $(CORE_DIR)/src/sound/tonegen.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/sound/tqsynth.cpp

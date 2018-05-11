@@ -27,8 +27,7 @@
 //----------------------------------------------------------------------------
 
 #include <stdint.h>
-//#include <stdlib.h>
-#include "SDL.h"
+#include <stdlib.h>
 //#include "common.hpp"
 //#include "logger.hpp"
 #include "tms9919.hpp"
