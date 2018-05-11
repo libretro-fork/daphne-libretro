@@ -49,10 +49,6 @@
 
 using namespace std;
 
-#ifdef MAC_OSX
-#include "mmxdefs.h"
-#endif
-
 #ifndef FREEBSD
 #include <SDL_main.h>
 #else

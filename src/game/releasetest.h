@@ -25,10 +25,6 @@
 #ifndef RELEASETEST_H
 #define RELEASETEST_H
 
-#ifdef MAC_OSX
-#include "mmxdefs.h"
-#endif
-
 #include <vector>
 #include <string>
 #include "game.h"
