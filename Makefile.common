@@ -1,0 +1,33 @@
+INCFLAGS    := -I$(CORE_DIR) \
+					-I$(CORE_DIR)/deps/libogg/include \
+					-I$(CORE_DIR)/deps/libvorbis/include \
+					-I$(CORE_DIR)/deps/libvorbis/lib
+
+DEPS_DIR    := $(CORE_DIR)/deps
+
+SOURCES_C   := $(DEPS_DIR)/libogg/src/bitwise.c \
+					$(DEPS_DIR)/libogg/src/framing.c \
+					$(DEPS_DIR)/libvorbis/lib/analysis.c \
+					$(DEPS_DIR)/libvorbis/lib/bitrate.c \
+					$(DEPS_DIR)/libvorbis/lib/block.c \
+					$(DEPS_DIR)/libvorbis/lib/codebook.c \
+					$(DEPS_DIR)/libvorbis/lib/envelope.c \
+					$(DEPS_DIR)/libvorbis/lib/floor0.c \
+					$(DEPS_DIR)/libvorbis/lib/floor1.c \
+					$(DEPS_DIR)/libvorbis/lib/info.c \
+					$(DEPS_DIR)/libvorbis/lib/lookup.c \
+					$(DEPS_DIR)/libvorbis/lib/lpc.c \
+					$(DEPS_DIR)/libvorbis/lib/lsp.c \
+					$(DEPS_DIR)/libvorbis/lib/mapping0.c \
+					$(DEPS_DIR)/libvorbis/lib/mdct.c \
+					$(DEPS_DIR)/libvorbis/lib/psy.c \
+					$(DEPS_DIR)/libvorbis/lib/registry.c \
+					$(DEPS_DIR)/libvorbis/lib/res0.c \
+					$(DEPS_DIR)/libvorbis/lib/sharedbook.c \
+					$(DEPS_DIR)/libvorbis/lib/smallft.c \
+					$(DEPS_DIR)/libvorbis/lib/synthesis.c \
+					$(DEPS_DIR)/libvorbis/lib/vorbisenc.c \
+					$(DEPS_DIR)/libvorbis/lib/vorbisfile.c \
+					$(DEPS_DIR)/libvorbis/lib/window.c \
+
+SOURCES_CXX :=
