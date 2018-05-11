@@ -712,7 +712,7 @@ void lair2::do_irq(unsigned int which_irq)
 {
 	if (m_bSerialHack)
 	{
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+#ifndef MSB_FIRST
 		while (ldp1000_result_ready())
 		{
 			// NOTE : only works on little endian!

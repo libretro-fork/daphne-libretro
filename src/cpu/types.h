@@ -26,12 +26,12 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#include <SDL.h>	// for endian detection
+#include <stdint.h>
 
-// MPO : added this SDL endian stuff so no source code changes are necessary
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-/* Define this if running on little-endian (x86) systems */
+#ifdef MSB_FIRST
+#else
 #define HOST_LITTLE_ENDIAN
+/* Define this if running on little-endian (x86) systems */
 #endif
 
 // MPO : translate our convention to Nofrendo's convention

@@ -414,10 +414,10 @@ Uint8 *g_line_buf3 = NULL;	// 3rd buf
 ////////////////////////////////////////
 
 // 2 pixels of black in YUY2 format (different for big and little endian)
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-#define YUY2_BLACK 0x7f007f00
-#else
+#ifdef MSB_FIRST
 #define YUY2_BLACK 0x007f007f
+#else
+#define YUY2_BLACK 0x7f007f00
 #endif
 
 /////////////////////////////////////////
@@ -2186,36 +2186,35 @@ int prepare_frame_callback_with_overlay(struct yuv_buf *src)
 						unsigned int V_chunk = *V;
 						unsigned int U_chunk = *U;
 						
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-						//Little-Endian (Intel)
-						*((Uint32 *) (g_line_buf + col)) = (Y_chunk & 0xFF) | (U_chunk << 8) |
-							((Y_chunk & 0xFF00) << 8) | (V_chunk << 24);
-						*((Uint32 *) (g_line_buf2 + col)) = (Y2_chunk & 0xFF) | (U_chunk << 8) |
-							((Y2_chunk & 0xFF00) << 8) | (V_chunk << 24);
-#else						
+#ifdef MSB_FIRST
 						//Big-Endian (Mac)			
 						*((Uint32 *) (g_line_buf + col)) = ((Y_chunk & 0xFF00) << 16) | ((U_chunk) << 16) |
 							((Y_chunk & 0xFF) << 8) | (V_chunk);
 						*((Uint32 *) (g_line_buf2 + col)) = ((Y2_chunk & 0xFF00) << 16) | ((U_chunk) << 16) |
 							((Y2_chunk & 0xFF) << 8) | (V_chunk);												
+#else
+						//Little-Endian (Intel)
+						*((Uint32 *) (g_line_buf + col)) = (Y_chunk & 0xFF) | (U_chunk << 8) |
+							((Y_chunk & 0xFF00) << 8) | (V_chunk << 24);
+						*((Uint32 *) (g_line_buf2 + col)) = (Y2_chunk & 0xFF) | (U_chunk << 8) |
+							((Y2_chunk & 0xFF00) << 8) | (V_chunk << 24);
 #endif
 					}
 					
 					// if we have an overlay pixel to be drawn
 					else
 					{
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN							
-						//Little-Endian (Intel)
-						*((Uint32 *) (g_line_buf + col)) = 
-							*((Uint32 *) (g_line_buf2 + col)) = palette->y | (palette->u << 8)
-							| (palette->y << 16) | (palette->v << 24);						
-#else					
+#ifdef MSB_FIRST
 						//Big-Endian (Mac)
 						*((Uint32 *) (g_line_buf + col)) = 
 							*((Uint32 *) (g_line_buf2 + col)) = (palette->y << 24) | (palette->u << 16)
 							| (palette->y << 8) | (palette->v);
+#else
+						//Little-Endian (Intel)
+						*((Uint32 *) (g_line_buf + col)) = 
+							*((Uint32 *) (g_line_buf2 + col)) = palette->y | (palette->u << 8)
+							| (palette->y << 16) | (palette->v << 24);						
 #endif
-						
 					}
 					Y += 2;
 					Y2 += 2;
@@ -2456,21 +2455,19 @@ void buf2overlay_YUY2(Uint8 *out_pixels, Uint16 in_pitch, int in_h, int in_w, st
 			unsigned int V_chunk = *V;
 			unsigned int U_chunk = *U;
 			
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-			
-			//Little-Endian (PC)
-			*((Uint32 *) (g_line_buf + col)) = (Y_chunk & 0xFF) | (U_chunk << 8) |
-				((Y_chunk & 0xFF00) << 8) | (V_chunk << 24);
-			*((Uint32 *) (g_line_buf2 + col)) = (Y2_chunk & 0xFF) | (U_chunk << 8) |
-				((Y2_chunk & 0xFF00) << 8) | (V_chunk << 24);
-			
-#else
-			
+#ifdef MSB_FIRST
 			//Big-Endian (Mac)
 			*((Uint32 *) (g_line_buf + col)) = ((Y_chunk & 0xFF00) << 16) | ((U_chunk) << 16) |
 				((Y_chunk & 0xFF) << 8) | (V_chunk);
 			*((Uint32 *) (g_line_buf2 + col)) = ((Y2_chunk & 0xFF00) << 16) | ((U_chunk) << 16) |
 				((Y2_chunk & 0xFF) << 8) | (V_chunk);	
+			
+#else
+			//Little-Endian (PC)
+			*((Uint32 *) (g_line_buf + col)) = (Y_chunk & 0xFF) | (U_chunk << 8) |
+				((Y_chunk & 0xFF00) << 8) | (V_chunk << 24);
+			*((Uint32 *) (g_line_buf2 + col)) = (Y2_chunk & 0xFF) | (U_chunk << 8) |
+				((Y2_chunk & 0xFF00) << 8) | (V_chunk << 24);
 			
 #endif
 			
