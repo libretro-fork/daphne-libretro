@@ -1,6 +1,7 @@
 // interface for mc6809.c
 // by Mark Broadhead
 
+#include <stdint.h>
 #include <string.h>
 #include "mc6809.h"
 #include "6809infc.h"
@@ -12,7 +13,7 @@
 #pragma warning (disable:4100) // disable warning about unreferenced parameter
 #endif
 
-Uint8 *g_cpumem = NULL;	// where this cpu's memory begins
+uint8_t *g_cpumem = NULL;	// where this cpu's memory begins
 
 // RJS TEMP
 #define PRINTEM 0
@@ -23,7 +24,7 @@ static char s[81] = { 0 };
 #endif
 
 						// MATT : sets where the memory begins for the cpu core
-void m6809_set_memory(Uint8 *cpumem)
+void m6809_set_memory(uint8_t *cpumem)
 {
 	g_cpumem = cpumem;
 #if (PRINTEM)
@@ -45,24 +46,24 @@ static void FetchInstr(INT_MC addr, UCHAR_MC fetch_buffer[])
 static INT_MC LoadByte(INT_MC addr)
 {
 #if (PRINTEM)
-	Uint8 rc = g_game->cpu_mem_read(static_cast<Uint16>(addr)) & 0xff;
+	uint8_t rc = g_game->cpu_mem_read(static_cast<uint16_t>(addr)) & 0xff;
 
-	sprintf(s, "LB: %d  Addr: %d  AddrANDff: %d", rc, static_cast<Uint16>(addr), static_cast<Uint16>(addr) & 0xff);
+	sprintf(s, "LB: %d  Addr: %d  AddrANDff: %d", rc, static_cast<uint16_t>(addr), static_cast<uint16_t>(addr) & 0xff);
 	printline(s);
 
 	return (rc);
 #else
-	return (g_game->cpu_mem_read(static_cast<Uint16>(addr)) & 0xff);
+	return (g_game->cpu_mem_read(static_cast<uint16_t>(addr)) & 0xff);
 #endif
 }
 
 static INT_MC LoadWord(INT_MC addr)
 {
-	UCHAR_MC high_byte = (g_game->cpu_mem_read(static_cast<Uint16>(addr)) & 0xff);
-	UCHAR_MC low_byte = (g_game->cpu_mem_read(static_cast<Uint16>(addr + 1)) & 0xff);
+	UCHAR_MC high_byte = (g_game->cpu_mem_read(static_cast<uint16_t>(addr)) & 0xff);
+	UCHAR_MC low_byte = (g_game->cpu_mem_read(static_cast<uint16_t>(addr + 1)) & 0xff);
 
 #if (PRINTEM)
-	sprintf(s, "LW: hb: %d  lb: %d  combine: %d  Addr: %d  AddrANDff: %d", high_byte, low_byte, (high_byte << 8) | low_byte, static_cast<Uint16>(addr), static_cast<Uint16>(addr) & 0xff);
+	sprintf(s, "LW: hb: %d  lb: %d  combine: %d  Addr: %d  AddrANDff: %d", high_byte, low_byte, (high_byte << 8) | low_byte, static_cast<uint16_t>(addr), static_cast<uint16_t>(addr) & 0xff);
 	printline(s);
 #endif
 
@@ -71,21 +72,21 @@ static INT_MC LoadWord(INT_MC addr)
 
 static void StoreByte(INT_MC addr, INT_MC value)
 {
-	g_game->cpu_mem_write(static_cast<Uint16>(addr & 0xffff), (value & 0xff));
+	g_game->cpu_mem_write(static_cast<uint16_t>(addr & 0xffff), (value & 0xff));
 
 #if (PRINTEM)
-	sprintf(s, "SB: %d  ValueANDff: %d  Addr: %d  AddrANDffff: %d", value, (value & 0xff), static_cast<Uint16>(addr), static_cast<Uint16>(addr & 0xffff));
+	sprintf(s, "SB: %d  ValueANDff: %d  Addr: %d  AddrANDffff: %d", value, (value & 0xff), static_cast<uint16_t>(addr), static_cast<uint16_t>(addr & 0xffff));
 	printline(s);
 #endif
 }
 
 static void StoreWord(INT_MC addr, INT_MC value)
 {
-	g_game->cpu_mem_write(static_cast<Uint16>(addr & 0xffff), ((value >> 8) & 0xff));
-	g_game->cpu_mem_write(static_cast<Uint16>((addr + 1) & 0xffff), (value & 0xff));
+	g_game->cpu_mem_write(static_cast<uint16_t>(addr & 0xffff), ((value >> 8) & 0xff));
+	g_game->cpu_mem_write(static_cast<uint16_t>((addr + 1) & 0xffff), (value & 0xff));
 
 #if (PRINTEM)
-	sprintf(s, "SW: hb: %d  lb: %d  Addr: %d  AddrANDffff: %d", ((value >> 8) & 0xff), (value & 0xff), static_cast<Uint16>(addr), static_cast<Uint16>(addr & 0xffff));
+	sprintf(s, "SW: hb: %d  lb: %d  Addr: %d  AddrANDffff: %d", ((value >> 8) & 0xff), (value & 0xff), static_cast<uint16_t>(addr), static_cast<uint16_t>(addr & 0xffff));
 	printline(s);
 #endif
 }

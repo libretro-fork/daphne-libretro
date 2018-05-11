@@ -32,6 +32,10 @@ SOURCES_C   := $(DEPS_DIR)/libogg/src/bitwise.c \
 
 SOURCES_CXX := 
 
+SOURCES_CXX += $(CORE_DIR)/src/cpu/cop.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/copintf.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/cpu.cpp
+#SOURCES_CXX += $(CORE_DIR)/src/cpu/6809infc.cpp
 #SOURCES_CXX += $(CORE_DIR)/src/io/cmdline.cpp
 
 SOURCES_CXX += $(CORE_DIR)/src/sound/dac.cpp

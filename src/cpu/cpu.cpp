@@ -38,6 +38,7 @@
 
 #include "cpu.h"
 #include <stdio.h>	// for stderr
+#include <stdint.h>
 #include <string.h>	// for memcpy
 #include "../daphne.h"
 #include "../game/game.h"
@@ -72,15 +73,15 @@
 
 using namespace std;
 
-stack <Uint32> g_cpu_paused_timer;	// the time we were at when cpu_pause_timer was called
+stack <uint32_t> g_cpu_paused_timer;	// the time we were at when cpu_pause_timer was called
 bool g_cpu_paused = false;
 
 struct cpudef *g_head = NULL;	// pointer to the first cpu in our linked list of cpu's
 unsigned char g_cpu_count = 0;	// how many cpu's have been added
 bool g_cpu_initialized[CPU_COUNT] = { false };	// whether cpu core has been initialized
-Uint32 g_cpu_timer = 0;	// used to make cpu's run at the right speed
-Uint32 g_expected_elapsed_ms = 0;	// how many ms we expect to have elapsed since last cpu execution loop
-Uint8 g_active_cpu = 0;	// which cpu is currently active
+uint32_t g_cpu_timer = 0;	// used to make cpu's run at the right speed
+uint32_t g_expected_elapsed_ms = 0;	// how many ms we expect to have elapsed since last cpu execution loop
+uint8_t g_active_cpu = 0;	// which cpu is currently active
 unsigned int g_uInterleavePerMs = 1; // number of times the cpus switch in 1 ms 
 
 // How many milliseconds the CPU emulation is lagging behind.
@@ -386,7 +387,7 @@ int retro_run_frames_delta		= 0;
 void cpu_execute_loop()
 {
 	int i = 0;
-	Uint32 last_inputcheck = 0; //time we last polled for input events
+	uint32_t last_inputcheck = 0; //time we last polled for input events
 	struct cpudef *cpu = g_head;
 
 	// flush the cpu timers one time so we don't begin with the cpu's running too quickly
@@ -429,8 +430,8 @@ void cpu_execute_loop()
 
 		unsigned int actual_elapsed_ms = 0;
 		bool nmi_asserted = false;
-		Uint32 elapsed_cycles = 0;
-		Uint32 cycles_to_execute = 0;	// how many cycles to execute this time around
+		uint32_t elapsed_cycles = 0;
+		uint32_t cycles_to_execute = 0;	// how many cycles to execute this time around
 
 		// we want to execute enough cycles to reach our expectation for # of elapsed ms
 		g_expected_elapsed_ms++;
@@ -455,7 +456,7 @@ void cpu_execute_loop()
 
 				// NOTE: if g_uInterleavePerMs is 1, then this calculation is the same as
 				//  (g_expected_elapsed_ms * cpu->hz) / 1000
-				Uint64 u64ExpectedCycles = (( ((Uint64) (g_expected_elapsed_ms - 1)) * cpu->hz) / 1000) +
+				uint64_t u64ExpectedCycles = (( ((uint64_t) (g_expected_elapsed_ms - 1)) * cpu->hz) / 1000) +
 					(cpu->uCyclesPerInterleave * uInterleaveCount);
 
 				if (u64ExpectedCycles > cpu->total_cycles_executed)
@@ -465,13 +466,13 @@ void cpu_execute_loop()
 					assert((u64ExpectedCycles - cpu->total_cycles_executed) < (unsigned int) (1 << 31));
 #endif
 					// calculate # of cycles to execute
-					cycles_to_execute = (Uint32) (u64ExpectedCycles - cpu->total_cycles_executed);
+					cycles_to_execute = (uint32_t) (u64ExpectedCycles - cpu->total_cycles_executed);
 
 					// if we have no upcoming event
 					if (cpu->uEventCyclesEnd == 0)
 					{
 						// get us up to our expected elapsed MS
-						elapsed_cycles = (cpu->execute_callback)((Uint32) cycles_to_execute);
+						elapsed_cycles = (cpu->execute_callback)((uint32_t) cycles_to_execute);
 
 						cpu->total_cycles_executed += elapsed_cycles;	// always track how many cycles have elapsed
 					}
@@ -519,7 +520,7 @@ void cpu_execute_loop()
 						}
 
 						// get us up to our expected elapsed MS
-						elapsed_cycles = (cpu->execute_callback)((Uint32) cycles_to_execute);
+						elapsed_cycles = (cpu->execute_callback)((uint32_t) cycles_to_execute);
 
 						cpu->total_cycles_executed += elapsed_cycles;	// always track how many cycles have elapsed
 						cpu->uEventCyclesExecuted += elapsed_cycles;
@@ -545,7 +546,7 @@ void cpu_execute_loop()
 					{
 						++cpu->pending_nmi_count;
 						++cpu->uNMITickCount;
-						cpu->uNMITickBoundaryMs = (Uint32) (( ((Uint64) (cpu->uNMITickCount + 1)) * cpu->uNMIMicroPeriod) / 1000);
+						cpu->uNMITickBoundaryMs = (uint32_t) (( ((uint64_t) (cpu->uNMITickCount + 1)) * cpu->uNMIMicroPeriod) / 1000);
 #ifdef CPU_DIAG
 						++cd_nmi_count[cpu->id];
 #endif
@@ -574,7 +575,7 @@ void cpu_execute_loop()
 						{
 							++cpu->pending_irq_count[i];
 							++cpu->uIRQTickCount[i];
-							cpu->uIRQTickBoundaryMs[i] = (Uint32) (( ((Uint64) (cpu->uIRQTickCount[i] + 1)) *
+							cpu->uIRQTickBoundaryMs[i] = (uint32_t) (( ((uint64_t) (cpu->uIRQTickCount[i] + 1)) *
 								cpu->uIRQMicroPeriod[i]) / 1000);
 #ifdef CPU_DIAG
 							++cd_irq_count[cpu->id][i];
@@ -620,7 +621,7 @@ void cpu_execute_loop()
 				// if it's time to print some statistics
 				if (cd_cycle_count[g_active_cpu] >= CPU_DIAG_ACCURACY)
 				{
-					Uint32 elapsed_ms = elapsed_ms_time(cd_old_time[g_active_cpu]);
+					uint32_t elapsed_ms = elapsed_ms_time(cd_old_time[g_active_cpu]);
 					double cur_mhz = ((double) cd_cycle_count[g_active_cpu] / (double) elapsed_ms) * 0.001;
 					cd_report_count[g_active_cpu]++;
 
@@ -755,7 +756,7 @@ void cpu_execute_loop()
 }
 
 
-// Uint32 last_inputcheck = 0;
+// uint32_t last_inputcheck = 0;
 struct cpudef *cpu = g_head;
 static int one_cycle_inited = 0;
 
@@ -799,8 +800,8 @@ void cpu_execute_one_cycle()
 	// {
 		unsigned int actual_elapsed_ms = 0;
 		bool nmi_asserted = false;
-		Uint32 elapsed_cycles = 0;
-		Uint32 cycles_to_execute = 0;	// how many cycles to execute this time around
+		uint32_t elapsed_cycles = 0;
+		uint32_t cycles_to_execute = 0;	// how many cycles to execute this time around
 
 										// we want to execute enough cycles to reach our expectation for # of elapsed ms
 		g_expected_elapsed_ms++;
@@ -825,7 +826,7 @@ void cpu_execute_one_cycle()
 
 				// NOTE: if g_uInterleavePerMs is 1, then this calculation is the same as
 				//  (g_expected_elapsed_ms * cpu->hz) / 1000
-				Uint64 u64ExpectedCycles = ((((Uint64)(g_expected_elapsed_ms - 1)) * cpu->hz) / 1000) +
+				uint64_t u64ExpectedCycles = ((((uint64_t)(g_expected_elapsed_ms - 1)) * cpu->hz) / 1000) +
 					(cpu->uCyclesPerInterleave * uInterleaveCount);
 
 				if (u64ExpectedCycles > cpu->total_cycles_executed)
@@ -835,13 +836,13 @@ void cpu_execute_one_cycle()
 					assert((u64ExpectedCycles - cpu->total_cycles_executed) < (unsigned int)(1 << 31));
 #endif
 					// calculate # of cycles to execute
-					cycles_to_execute = (Uint32)(u64ExpectedCycles - cpu->total_cycles_executed);
+					cycles_to_execute = (uint32_t)(u64ExpectedCycles - cpu->total_cycles_executed);
 
 					// if we have no upcoming event
 					if (cpu->uEventCyclesEnd == 0)
 					{
 						// get us up to our expected elapsed MS
-						elapsed_cycles = (cpu->execute_callback)((Uint32)cycles_to_execute);
+						elapsed_cycles = (cpu->execute_callback)((uint32_t)cycles_to_execute);
 
 						cpu->total_cycles_executed += elapsed_cycles;	// always track how many cycles have elapsed
 					}
@@ -889,7 +890,7 @@ void cpu_execute_one_cycle()
 						}
 
 						// get us up to our expected elapsed MS
-						elapsed_cycles = (cpu->execute_callback)((Uint32)cycles_to_execute);
+						elapsed_cycles = (cpu->execute_callback)((uint32_t)cycles_to_execute);
 
 						cpu->total_cycles_executed += elapsed_cycles;	// always track how many cycles have elapsed
 						cpu->uEventCyclesExecuted += elapsed_cycles;
@@ -915,7 +916,7 @@ void cpu_execute_one_cycle()
 					{
 						++cpu->pending_nmi_count;
 						++cpu->uNMITickCount;
-						cpu->uNMITickBoundaryMs = (Uint32)((((Uint64)(cpu->uNMITickCount + 1)) * cpu->uNMIMicroPeriod) / 1000);
+						cpu->uNMITickBoundaryMs = (uint32_t)((((uint64_t)(cpu->uNMITickCount + 1)) * cpu->uNMIMicroPeriod) / 1000);
 #ifdef CPU_DIAG
 						++cd_nmi_count[cpu->id];
 #endif
@@ -944,7 +945,7 @@ void cpu_execute_one_cycle()
 						{
 							++cpu->pending_irq_count[i];
 							++cpu->uIRQTickCount[i];
-							cpu->uIRQTickBoundaryMs[i] = (Uint32)((((Uint64)(cpu->uIRQTickCount[i] + 1)) *
+							cpu->uIRQTickBoundaryMs[i] = (uint32_t)((((uint64_t)(cpu->uIRQTickCount[i] + 1)) *
 								cpu->uIRQMicroPeriod[i]) / 1000);
 #ifdef CPU_DIAG
 							++cd_irq_count[cpu->id][i];
@@ -990,7 +991,7 @@ void cpu_execute_one_cycle()
 				// if it's time to print some statistics
 				if (cd_cycle_count[g_active_cpu] >= CPU_DIAG_ACCURACY)
 				{
-					Uint32 elapsed_ms = elapsed_ms_time(cd_old_time[g_active_cpu]);
+					uint32_t elapsed_ms = elapsed_ms_time(cd_old_time[g_active_cpu]);
 					double cur_mhz = ((double)cd_cycle_count[g_active_cpu] / (double)elapsed_ms) * 0.001;
 					cd_report_count[g_active_cpu]++;
 
@@ -1248,7 +1249,7 @@ void cpu_unpause()
 
 // returns the timer used by all cpu's to run at the proper speed
 // WARNING: this timer is reset by flush_cpu_timers
-Uint32 get_cpu_timer()
+uint32_t get_cpu_timer()
 {
 	return g_cpu_timer;
 }
@@ -1259,9 +1260,9 @@ Uint32 get_cpu_timer()
 // WARNING : flush_cpu_timers will reset the total_cycles_executed so you must always check
 // for this by making sure latest result is greater than previous result
 // Failure to check for this will result in some very puzzling and frustrating bugs
-Uint64 get_total_cycles_executed(Uint8 id)
+uint64_t get_total_cycles_executed(uint8_t id)
 {
-	Uint64 result = 0;	
+	uint64_t result = 0;	
 	struct cpudef *cpu = get_cpu_struct(id);
 	
 	if (cpu)
@@ -1273,7 +1274,7 @@ Uint64 get_total_cycles_executed(Uint8 id)
 
 // returns the pointer to the cpu structure using the cpu id as input
 // returns NULL if the cpu doesn't exist
-struct cpudef *get_cpu_struct(Uint8 id)
+struct cpudef *get_cpu_struct(uint8_t id)
 {
 	struct cpudef *result = NULL;
 	struct cpudef *cpu = g_head;
@@ -1299,9 +1300,9 @@ unsigned char cpu_getactivecpu()
 
 // returns the location of the memory for the indicated cpu
 // returns NULL of the indicated cpu has no memory (ie if the cpu does not exist)
-Uint8 *get_cpu_mem(Uint8 id)
+uint8_t *get_cpu_mem(uint8_t id)
 {
-	Uint8 *result = NULL;
+	uint8_t *result = NULL;
 	struct cpudef *cpustruct = get_cpu_struct(id);
 
 	// if the cpu exists, then we can return its memory	
@@ -1315,9 +1316,9 @@ Uint8 *get_cpu_mem(Uint8 id)
 }
 
 // returns the Hz of the CPU indicated, or 0 if the cpu does not exist
-Uint32 get_cpu_hz(Uint8 id)
+uint32_t get_cpu_hz(uint8_t id)
 {
-	Uint32 result = 0;
+	uint32_t result = 0;
 	struct cpudef *cpustruct = get_cpu_struct(id);
 
 	// if the cpu exists, then we can return its memory	
@@ -1329,7 +1330,7 @@ Uint32 get_cpu_hz(Uint8 id)
 	return result;
 }
 
-void cpu_change_nmi(Uint8 id, double new_period)
+void cpu_change_nmi(uint8_t id, double new_period)
 {
 	struct cpudef *cpu = get_cpu_struct(id);
 	
@@ -1344,7 +1345,7 @@ void cpu_change_nmi(Uint8 id, double new_period)
 	}
 }
 
-void cpu_generate_nmi(Uint8 cpu_id)
+void cpu_generate_nmi(uint8_t cpu_id)
 {
 	struct cpudef *cpu = get_cpu_struct(cpu_id);
 
@@ -1355,7 +1356,7 @@ void cpu_generate_nmi(Uint8 cpu_id)
 	cpu->pending_nmi_count++;
 }
 
-void cpu_change_irq(Uint8 id, unsigned int which_irq, double new_period)
+void cpu_change_irq(uint8_t id, unsigned int which_irq, double new_period)
 {
 #ifdef DEBUG
 	assert(which_irq < MAX_IRQS);
@@ -1369,12 +1370,12 @@ void cpu_change_irq(Uint8 id, unsigned int which_irq, double new_period)
 
 	cpu->irq_period[which_irq] = new_period;
 	cpu_recalc();
-//	cpu->cycles_per_irq[which_irq] = (Uint32) (cpu->cycles_per_ms * cpu->irq_period[which_irq]);
+//	cpu->cycles_per_irq[which_irq] = (uint32_t) (cpu->cycles_per_ms * cpu->irq_period[which_irq]);
 //	cpu->irq_cycle_count[which_irq] = 0;
 
 }
 
-void cpu_generate_irq(Uint8 cpu_id, unsigned int which_irq)
+void cpu_generate_irq(uint8_t cpu_id, unsigned int which_irq)
 {
 #ifdef DEBUG
 	assert(which_irq < MAX_IRQS);
@@ -1414,7 +1415,7 @@ void generic_6502_reset()
 	NES_6502::Reset();
 }
 
-void generic_6502_setmemory(Uint8 *buf)
+void generic_6502_setmemory(uint8_t *buf)
 {
     NES_6502::Context context;
 
@@ -1434,7 +1435,7 @@ void generic_6502_setmemory(Uint8 *buf)
 
 }
 
-Uint32 generic_6502_getcontext(void *context_buf)
+uint32_t generic_6502_getcontext(void *context_buf)
 {
 	g_6502->GetContext((NES_6502::Context *) context_buf);
 	return sizeof(NES_6502::Context);
@@ -1486,7 +1487,7 @@ const char *generic_6502_info(void *unused, int regnum)
 
 // just a stub if the cpu core cannot return current # of elapsed cycles
 // this always returns 0
-Uint32 generic_cpu_elapsedcycles_stub()
+uint32_t generic_cpu_elapsedcycles_stub()
 {
 	return 0;
 }
