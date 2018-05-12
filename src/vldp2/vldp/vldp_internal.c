@@ -822,9 +822,9 @@ void ivldp_render()
 
 #ifdef VLDP_BENCHMARK
 	Uint32 render_start_time = SDL_GetTicks();	// keep track of when we started
-	Sint16 render_start_frame = g_out_info.current_frame;	// keep track of the frame we started timing stuff on
+	int16_t render_start_frame = g_out_info.current_frame;	// keep track of the frame we started timing stuff on
 	double total_seconds = 0.0;	// used to calculate FPS
-	Sint16 total_frames = 0;	// used to calculate FPS
+	int16_t total_frames = 0;	// used to calculate FPS
 	FILE *F = fopen("benchmark.txt", "wt");	// create a little logfile for benchmark results
 #endif
 

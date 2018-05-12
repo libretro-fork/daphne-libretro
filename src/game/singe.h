@@ -20,6 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdint.h>
+
 #include "../daphne.h"           // for get_quitflag
 #include "game.h"
 #include "../io/conout.h"
@@ -47,7 +49,7 @@ public:
 	void shutdown();
 	void input_enable(Uint8);
 	void input_disable(Uint8);
-	void OnMouseMotion(Uint16 x, Uint16 y, Sint16 xrel, Sint16 yrel);
+	void OnMouseMotion(Uint16 x, Uint16 y, int16_t xrel, int16_t yrel);
 	bool handle_cmdline_arg(const char *arg);
 	void palette_calculate();
 	void video_repaint();
