@@ -38,19 +38,8 @@
 // #include "attributes.h"
 #include "../include/attributes.h"
 
-#ifdef ARCH_X86
-#include "mmx.h"
-#endif
-
 void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
 void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
-
-#ifdef ARCH_X86
-static void state_restore_mmx (cpu_state_t * state)
-{
-    emms ();
-}
-#endif
 
 #ifdef ARCH_PPC
 static void state_save_altivec (cpu_state_t * state)
@@ -114,11 +103,6 @@ static void state_restore_altivec (cpu_state_t * state)
 
 void mpeg2_cpu_state_init (uint32_t accel)
 {
-#ifdef ARCH_X86
-    if (accel & MPEG2_ACCEL_X86_MMX) {
-	mpeg2_cpu_state_restore = state_restore_mmx;
-    }
-#endif
 #ifdef ARCH_PPC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
 	mpeg2_cpu_state_save = state_save_altivec;

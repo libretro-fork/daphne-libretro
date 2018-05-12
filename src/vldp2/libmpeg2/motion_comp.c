@@ -37,16 +37,6 @@ mpeg2_mc_t mpeg2_mc;
 
 void mpeg2_mc_init (uint32_t accel)
 {
-#ifdef ARCH_PPC
-    if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
-	mpeg2_mc = mpeg2_mc_altivec;
-    else
-#endif
-#ifdef ARCH_ALPHA
-    if (accel & MPEG2_ACCEL_ALPHA)
-	mpeg2_mc = mpeg2_mc_alpha;
-    else
-#endif
 	mpeg2_mc = mpeg2_mc_c;
 }
 
