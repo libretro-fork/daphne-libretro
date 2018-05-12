@@ -48,11 +48,14 @@ SOURCES_CXX += $(CORE_DIR)/src/cpu/cpu-debug.cpp
 SOURCES_CXX += $(CORE_DIR)/src/cpu/nes6502.cpp
 #SOURCES_CXX += $(CORE_DIR)/src/cpu/z80.cpp
 
+#SOURCES_CXX += $(CORE_DIR)/src/game/thayers.cpp
+
 #SOURCES_CXX += $(CORE_DIR)/src/io/cmdline.cpp
 #SOURCES_CXX  += $(CORE_DIR)/src/io/conin.cpp
 #SOURCES_CXX  += $(CORE_DIR)/src/io/conout.cpp
 #SOURCES_CXX  += $(CORE_DIR)/src/io/error.cpp
 SOURCES_CXX  += $(CORE_DIR)/src/io/numstr.cpp
+SOURCES_CXX  += $(CORE_DIR)/src/io/mpo_fileio.cpp
 SOURCES_CXX  += $(CORE_DIR)/src/io/parallel.cpp
 #SOURCES_CXX  += $(CORE_DIR)/src/io/serial.cpp
 SOURCES_CXX  += $(CORE_DIR)/src/io/sram.cpp

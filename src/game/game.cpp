@@ -260,31 +260,31 @@ void game::do_nmi()
 }
 
 // reads a byte from a 16-bit address space
-Uint8 game::cpu_mem_read(Uint16 addr)
+uint8_t game::cpu_mem_read(uint16_t addr)
 {
 	return m_cpumem[addr];
 }
 
 // reads a byte from a 32-bit address space
-Uint8 game::cpu_mem_read(Uint32 addr)
+uint8_t game::cpu_mem_read(uint32_t addr)
 {
 	return m_cpumem[addr];
 }
 
 // writes a byte to a 16-bit addresss space
-void game::cpu_mem_write(Uint16 addr, Uint8 value)
+void game::cpu_mem_write(uint16_t addr, uint8_t value)
 {
 	m_cpumem[addr] = value;
 }
 
 // writes a byte to a 32-bit address space
-void game::cpu_mem_write(Uint32 addr, Uint8 value)
+void game::cpu_mem_write(uint32_t addr, uint8_t value)
 {
 	m_cpumem[addr] = value;
 }
 
 // reads a byte from the cpu's port
-Uint8 game::port_read(Uint16 port)
+uint8_t game::port_read(uint16_t port)
 {
 	char s[81] = { 0 };
 
@@ -296,7 +296,7 @@ Uint8 game::port_read(Uint16 port)
 }
 
 // writes a byte to the cpu's port
-void game::port_write(Uint16 port, Uint8 value)
+void game::port_write(uint16_t port, uint8_t value)
 {
 	char s[81] = { 0 };
 
@@ -307,7 +307,7 @@ void game::port_write(Uint16 port, Uint8 value)
 }
 
 // notifies us of the new Program Counter (which most games usually don't care about)
-void game::update_pc(Uint32 new_pc)
+void game::update_pc(uint32_t new_pc)
 {
 	// I put this here to get rid of warnings
 	if (new_pc)
@@ -315,7 +315,7 @@ void game::update_pc(Uint32 new_pc)
 	}
 }
 
-void game::input_enable(Uint8 input)
+void game::input_enable(uint8_t input)
 {
 	// get rid of warnings
 	if (input)
@@ -325,7 +325,7 @@ void game::input_enable(Uint8 input)
 	printline("Warning: generic input_enable function called, does nothing");
 }
 
-void game::input_disable(Uint8 input)
+void game::input_disable(uint8_t input)
 {
 	// get rid of warnings
 	if (input)
@@ -336,7 +336,7 @@ void game::input_disable(Uint8 input)
 }
 
 // Added by ScottD
-void game::OnMouseMotion(Uint16 x, Uint16 y, Sint16 xrel, Sint16 yrel)
+void game::OnMouseMotion(uint16_t x, uint16_t y, int16_t xrel, int16_t yrel)
 {
 	// get rid of warnings
 	if (x || y || xrel || yrel)
@@ -507,8 +507,8 @@ void Scale(SDL_Surface* src, SDL_Surface* dst, long* matrix)
 	long i;
 	long m=dst->w*dst->h;
 
-	Uint8* srcpixmap=(Uint8*)src->pixels;
-	Uint8* dstpixmap=(Uint8*)dst->pixels;
+	uint8_t* srcpixmap=(uint8_t*)src->pixels;
+	uint8_t* dstpixmap=(uint8_t*)dst->pixels;
 
 	for (i=0; i<m; i++) {			
 		dstpixmap[i] = srcpixmap[matrix[i]];
@@ -824,9 +824,9 @@ bool game::load_roms()
 
 // returns true if the file in question exists, and has the proper CRC32
 // 'gamedir' is which rom directory (or .ZIP file) this file is expected to be in
-bool game::verify_required_file(const char *filename, const char *gamedir, Uint32 filecrc32)
+bool game::verify_required_file(const char *filename, const char *gamedir, uint32_t filecrc32)
 {
-	Uint8 *readme_test = NULL;
+	uint8_t *readme_test = NULL;
 	bool passed_test = false;
 	string path = gamedir;
 	path += "/";
@@ -842,7 +842,7 @@ bool game::verify_required_file(const char *filename, const char *gamedir, Uint3
 	if (io)
 	{
 
-		readme_test = new Uint8[io->size];	// allocate file buffer
+		readme_test = new uint8_t[io->size];	// allocate file buffer
 
 		if (readme_test)
 		{
@@ -905,7 +905,7 @@ bool game::verify_required_file(const char *filename, const char *gamedir, Uint3
 
 // loads size # of bytes from filename into buf
 // returns true if successful, or false if there was an error
-bool game::load_rom(const char *filename, Uint8 *buf, Uint32 size)
+bool game::load_rom(const char *filename, uint8_t *buf, uint32_t size)
 {
 	struct mpo_io *F;
 	MPO_BYTES_READ bytes_read = 0;
@@ -946,7 +946,7 @@ bool game::load_rom(const char *filename, Uint8 *buf, Uint32 size)
 }
 
 // transition function ...
-bool game::load_rom(const char *filename, const char *directory, Uint8 *buf, Uint32 size)
+bool game::load_rom(const char *filename, const char *directory, uint8_t *buf, uint32_t size)
 {
 	string full_path = directory;
 	full_path += "/";
@@ -957,7 +957,7 @@ bool game::load_rom(const char *filename, const char *directory, Uint8 *buf, Uin
 // similar to load_rom except this function loads a rom image from a .zip file
 // the previously-opened zip file is indicated by 'opened_zip_file'
 // true is returned only if the rom was loaded, and it was the expected length
-bool game::load_compressed_rom(const char *filename, unzFile opened_zip_file, Uint8 *buf, Uint32 size)
+bool game::load_compressed_rom(const char *filename, unzFile opened_zip_file, uint8_t *buf, uint32_t size)
 {
 	bool result = false;
 
@@ -973,7 +973,7 @@ bool game::load_compressed_rom(const char *filename, unzFile opened_zip_file, Ui
 		if (unzOpenCurrentFile(opened_zip_file) == UNZ_OK)
 		{
 			// read this file
-			Uint32 bytes_read = (Uint32) unzReadCurrentFile(opened_zip_file, buf, size);
+			uint32_t bytes_read = (uint32_t) unzReadCurrentFile(opened_zip_file, buf, size);
 			unzCloseCurrentFile(opened_zip_file);
 
 			// if we read what we expected to read ...
@@ -1095,12 +1095,12 @@ unsigned int game::get_disc_fpks()
 //	return m_disc_ms_per_frame;
 //}
 
-Uint8 game::get_game_type()
+uint8_t game::get_game_type()
 {
 	return m_game_type;
 }
 
-Uint32 game::get_num_sounds()
+uint32_t game::get_num_sounds()
 {
 	return m_num_sounds;
 }
@@ -1142,7 +1142,7 @@ void game::toggle_game_pause()
 	else if (g_ldp->get_status() == LDP_PLAYING)
 	{
 //		char frame[6];
-//		Uint16 cur_frame = g_ldp->get_current_frame();
+//		uint16_t cur_frame = g_ldp->get_current_frame();
 
 		LOGI("*** PAUSED");
 		cpu_pause();

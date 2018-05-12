@@ -26,6 +26,7 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
+#include <stdint.h>
 #include <SDL.h>
 
 #define LED_RANGE 17 //16 is normal, the 17th is for the 'A' in SAE
@@ -85,10 +86,10 @@ bool get_fullscreen();
 void set_fullscreen(bool value);
 void set_rotate_degrees(float fDegrees);
 void set_sboverlay_characterset(int value);
-Uint16 get_video_width();
-void set_video_width(Uint16);
-Uint16 get_video_height();
-void set_video_height(Uint16);
+uint16_t get_video_width();
+void set_video_width(uint16_t);
+uint16_t get_video_height();
+void set_video_height(uint16_t);
 // RJS START - Convert SDL_Overlay
 // void take_screenshot(SDL_Overlay *yuvimage);
 void take_screenshot(SDL_Texture *yuvimage);

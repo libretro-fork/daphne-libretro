@@ -27,7 +27,7 @@
 #include <list>
 #include <stdio.h>
 #include <string.h>
-#include <SDL.h>
+#include <stdint.h>
 #include "conout.h"
 #include "../daphne.h"
 #include "../video/video.h"
