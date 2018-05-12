@@ -29,6 +29,8 @@
 #pragma warning (disable:4786) // disable warning about truncating to 255 in debug info
 #endif
 
+#include <stdint.h>
+
 #include "releasetest.h"
 #include "../io/conout.h"
 #include "../io/numstr.h"
@@ -57,7 +59,7 @@ extern SDL_Surface *g_hw_overlay;
 #endif
 // RJS END
 extern struct yuv_buf g_blank_yuv_buf;	// to do overlay tests
-extern Sint32 g_vertical_offset;	// to do overlay tests
+extern int32_t g_vertical_offset;	// to do overlay tests
 extern Uint8 *g_line_buf;	// temp sys RAM for doing calculations so we can do fastest copies to slow video RAM
 extern Uint8 *g_line_buf2;	// 2nd buf
 extern Uint8 *g_line_buf3;	// 3rd buf
@@ -718,7 +720,7 @@ void releasetest::test_vldp_render()
 		if (g_hw_overlay)
 		{
 			test_result = true;
-			for (g_vertical_offset = -(REL_VID_H-1); (g_vertical_offset < (Sint32) (REL_VID_H)) && test_result; g_vertical_offset++)
+			for (g_vertical_offset = -(REL_VID_H-1); (g_vertical_offset < (int32_t) (REL_VID_H)) && test_result; g_vertical_offset++)
 			{
 				if (prepare_frame_callback_with_overlay(&g_blank_yuv_buf) == VLDP_TRUE)
 				{	

@@ -23,6 +23,7 @@
 // seektest.h
 // by Matt Ownby
 
+#include <stdint.h>
 #include "game.h"
 
 class seektest : public game
@@ -45,7 +46,7 @@ private:
 	
 	bool m_locked;	// if the seektest in "locked" mode?
 	bool m_overlay;	// video overlay enabled?
-	Sint32 m_frame_offset;	// how much to adjust current frame by
+	int32_t m_frame_offset;	// how much to adjust current frame by
 	bool m_multimpeg;	// whether the mpeg is expected to be split up into multiple parts
 	int *m_multimpeg_frames;	// array that holds each frame (if m_multimpeg is true), terminated with negative number
 };

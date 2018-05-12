@@ -42,6 +42,7 @@
 #include <assert.h>	// this may include an extra .DLL in windows that I don't want to rely on
 #endif
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -654,7 +655,7 @@ void ldp_vldp_audio_callback(Uint8 *stream, int len, int unused)
 			}
 
 			// if we're not too far behind, don't loop
-			else if ((Sint32) (correct_samples - g_samples_played) < len)
+			else if ((int32_t) (correct_samples - g_samples_played) < len)
 			{
 				audio_caught_up = true;
 			}
